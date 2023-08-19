@@ -1,6 +1,9 @@
 # 牛客论坛
 
-## Spring
+## 第一章
+
+### Spring
+
 * @Component和@Configuration的区别
 
   >   **@Configuration 中所有带 @Bean 注解的方法都会被动态代理（cglib），因此调用该方法返回的都是同一个实例。而 @Conponent 修饰的类不会被代理，每实例化一次就会创建一个新的对象。** 
@@ -53,5 +56,7 @@
     }
     ```
 
+### SpringMVC
 
+* thymeleaf模板需要将第二行标签改成<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
