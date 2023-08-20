@@ -60,3 +60,33 @@
 
 * thymeleaf模板需要将第二行标签改成<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
+### Mybatis
+
+* mysql和mybatis配置
+
+  ```yaml
+  spring:
+    thymeleaf:
+      cache: false  # 关闭thymeleaf缓存
+    datasource:  # 数据库配置
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        idle-timeout: 30000  # 空闲超时时间
+        maximum-pool-size: 15 #最大连接数量
+        minimum-idle: 5 #最少连接数
+      type: com.zaxxer.hikari.HikariDataSource
+      url: jdbc:mysql://192.168.113.128:3306/community?characterEncoding=utf-8&useSSL=false&serverTimezone=Hongkong
+      username: root
+      password: 123456
+  mybatis:
+    configuration:
+      mapUnderscoreToCamelCase: true   #转驼峰
+      useGeneratedKeys: true  #如果插入的表以自增列为主键，则允许 JDBC 支持自动生成主键，并可将自动生成的主键返回。
+    mapper-locations: classpath:mapper/*.xml  #映射文件位置
+    type-aliases-package: com.fosss.community.entity #配置文件中实体类不用写包名
+  
+  ```
+
+* 注意mybatis-spring-boot-starter和springboot的版本对应关系
+
+* 
