@@ -1,18 +1,13 @@
 package com.fosss.community.service;
 
-import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
-public class UserService {
-
-    @Autowired
-    private UserMapper userMapper;
-
-    public User findUserById(int id) {
-        return userMapper.selectById(id);
-    }
-
+/**
+ * @author: fosss
+ * Date: 2023/8/23
+ * Time: 15:29
+ * Description:
+ */
+public interface UserService {
+    User findUserById(int id);
 }
