@@ -22,9 +22,12 @@ mybatis:
   mapper-locations: classpath:mapper/*.xml  #映射文件位置
   type-aliases-package: com.fosss.community.entity #配置文件中实体类不用写包名
 
-
-
-
+#日志级别及存放位置
+logging:
+  level:
+    com.fosss.community: debug
+#  file:
+#    path: E:/PROJECT/community/logs
 
 
 
