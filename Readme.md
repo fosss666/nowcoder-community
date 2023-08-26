@@ -93,3 +93,20 @@
 
 ### 项目调试技巧
 
+### 版本控制
+
+* 常用命令
+
+  + git config --list   显示所有配置
+  + git config --global user.name "用户名"  配置用户名
+  + git config --global user.email "邮箱"  配置邮箱
+  + git init  初始化
+  + git status  查看不受git管理的文件
+  + git add  星.xml/星.java/ .   添加到本地仓库
+  + git commit -m '备注'  提交到暂存区
+  + git push 远程仓库网址 分支      推送到远程仓库
+  + ssh-keygen -t rsa -C "邮箱"   生成ssh密钥
+  + git clone  仓库地址  克隆项目
+  + 
+
+  
