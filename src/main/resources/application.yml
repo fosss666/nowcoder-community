@@ -19,7 +19,7 @@ spring:
     host: smtp.163.com
     username: ggrxhskd@163.com
     port: 25
-    password:
+    password: RDBGFFDJYOJXIQPR
 mybatis:
   configuration:
     mapUnderscoreToCamelCase: true   #转驼峰

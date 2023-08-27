@@ -4,6 +4,8 @@ import com.fosss.community.properties.MailProperty;
 import com.fosss.community.utils.MailUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.annotation.Resource;
 
@@ -20,10 +22,22 @@ public class MailTest {
     private MailProperty mailProperty;
     @Resource
     private MailUtil mailUtil;
+    @Resource
+    private TemplateEngine templateEngine;
 
     @Test
-    void testMail() {
+    void testTextMail() {
         //System.out.println(mailProperty.getHost());
         mailUtil.sendMail("1745179058@qq.com", "牛客论坛", "验证码：1111");
+    }
+
+    @Test
+    void testHtmlMail() {
+        Context context = new Context();
+        context.setVariable("username", "詹尼");
+        String process = templateEngine.process("/mail/demo", context);
+        System.out.println(process);
+
+        mailUtil.sendMail("1745179058@qq.com", "牛客论坛", process);
     }
 }
