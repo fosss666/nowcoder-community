@@ -1,5 +1,5 @@
 server:
-  port: 80
+  port: 8080
   servlet:
     context-path: /community
 spring:
@@ -15,6 +15,11 @@ spring:
     url: jdbc:mysql://192.168.113.128:3306/community?characterEncoding=utf-8&useSSL=false&serverTimezone=Hongkong
     username: root
     password: 123456
+  mail: # 邮件
+    host: smtp.163.com
+    username: ggrxhskd@163.com
+    port: 25
+    password:
 mybatis:
   configuration:
     mapUnderscoreToCamelCase: true   #转驼峰
