@@ -34,5 +34,9 @@ logging:
 #  file:
 #    path: E:/PROJECT/community/logs
 
+# 自定义配置
+community:
+  path:
+    domain: http://localhost:8080  #域名
 
 
