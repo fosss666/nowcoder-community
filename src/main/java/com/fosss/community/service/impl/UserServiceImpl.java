@@ -1,6 +1,8 @@
 package com.fosss.community.service.impl;
 
+import com.fosss.community.constant.ActivationStatusConstant;
 import com.fosss.community.constant.RegisterErrorEnum;
+import com.fosss.community.constant.UserStatusConstant;
 import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.UserService;
@@ -26,6 +28,8 @@ public class UserServiceImpl implements UserService {
     private String domain;
     @Value("${server.servlet.context-path}")
     private String contextPath;
+    @Value("${server.port}")
+    private int port;
 
     @Autowired
     private UserMapper userMapper;
@@ -89,12 +93,31 @@ public class UserServiceImpl implements UserService {
         // 激活邮件
         Context context = new Context();
         context.setVariable("email", user.getEmail());
-        // http://localhost:8080/community/activation/101/code
-        String url = domain + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
+        // http://localhost:8081/community/activation/101/code
+        String url = domain + ":" + port + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
         context.setVariable("url", url);
         String content = templateEngine.process("/mail/activation", context);
         mailUtil.sendMail(user.getEmail(), "激活账号", content);
 
         return map;
+    }
+
+    /**
+     * 激活验证码
+     */
+    @Override
+    public int activation(int userId, String code) {
+        //查询激活状态
+        User user = userMapper.selectById(userId);
+        if (user.getStatus() == UserStatusConstant.ALREADY_ACTIVATED) {
+            //已激活
+            return ActivationStatusConstant.ACTIVATION_REPEAT;
+        } else if (user.getActivationCode().equals(code)) {
+            //激活码正确,更新用户状态
+            userMapper.updateStatus(userId, UserStatusConstant.ALREADY_ACTIVATED);
+            return ActivationStatusConstant.ACTIVATION_SUCCESS;
+        } else {
+            return ActivationStatusConstant.ACTIVATION_FAILURE;
+        }
     }
 }

@@ -20,4 +20,9 @@ public interface UserService {
      * 用户注册
      */
     Map<String, Object> register(User user);
+
+    /**
+     * 激活验证码
+     */
+    int activation(int userId, String code);
 }

@@ -37,6 +37,6 @@ logging:
 # 自定义配置
 community:
   path:
-    domain: http://localhost:8080  #域名
+    domain: http://localhost  #域名
 
 
