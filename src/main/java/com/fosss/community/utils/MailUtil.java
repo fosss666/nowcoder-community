@@ -45,7 +45,7 @@ public class MailUtil {
             helper.setText(context, true);// true：内容支持html格式
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            log.error(ExceptionConstant.Mail_ERROR + "：" + e.getMessage());
+            log.error(ExceptionConstant.MAIL_ERROR + "：" + e.getMessage());
         }
     }
 

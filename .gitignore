@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### 敏感信息专用文件
+*.yaml

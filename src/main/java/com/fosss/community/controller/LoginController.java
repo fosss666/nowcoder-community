@@ -1,16 +1,25 @@
 package com.fosss.community.controller;
 
 import com.fosss.community.constant.ActivationStatusConstant;
+import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.constant.RegisterErrorEnum;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.UserService;
+import com.google.code.kaptcha.Producer;
 import com.sun.org.apache.regexp.internal.RE;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -19,11 +28,14 @@ import java.util.Map;
  * Time: 20:41
  * Description:
  */
+@Slf4j
 @Controller
 public class LoginController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private Producer kaptchaProducer;
 
     /**
      * 跳转注册页面
@@ -80,5 +92,26 @@ public class LoginController {
             model.addAttribute("target", "/index");
         }
         return "/site/operate-result";
+    }
+
+    /**
+     * 获取验证码图片
+     * todo 用redis替代session
+     */
+    @GetMapping("/kaptcha")
+    public void getKaptcha(HttpServletResponse response, HttpSession session) {
+        String text = kaptchaProducer.createText();
+        BufferedImage image = kaptchaProducer.createImage(text);
+        // 将验证码存入session
+        session.setAttribute("kaptcha", text);
+
+        // 将突图片输出给浏览器
+        response.setContentType("image/png");
+        try {
+            OutputStream os = response.getOutputStream();
+            ImageIO.write(image, "png", os);
+        } catch (IOException e) {
+            log.error(ExceptionConstant.CODE_IMAGE_ERROR + ":" + e.getMessage());
+        }
     }
 }
