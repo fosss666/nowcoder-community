@@ -1,9 +1,12 @@
 package com.fosss.community.service.impl;
 
 import com.fosss.community.constant.ActivationStatusConstant;
-import com.fosss.community.constant.RegisterErrorEnum;
+import com.fosss.community.constant.LoginTicketStatusConstant;
+import com.fosss.community.constant.UserErrorEnum;
 import com.fosss.community.constant.UserStatusConstant;
+import com.fosss.community.dao.LoginTicketMapper;
 import com.fosss.community.dao.UserMapper;
+import com.fosss.community.entity.LoginTicket;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
@@ -37,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private TemplateEngine templateEngine;
     @Resource
     private MailUtil mailUtil;
+    @Resource
+    private LoginTicketMapper loginTicketMapper;
 
 
     public User findUserById(int id) {
@@ -54,29 +59,29 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("参数不能为空!");
         }
         if (StringUtils.isBlank(user.getUsername())) {
-            map.put(RegisterErrorEnum.USERNAME_NULL.getKey(), RegisterErrorEnum.USERNAME_NULL.getMsg());
+            map.put(UserErrorEnum.USERNAME_NULL.getKey(), UserErrorEnum.USERNAME_NULL.getMsg());
             return map;
         }
         if (StringUtils.isBlank(user.getPassword())) {
-            map.put(RegisterErrorEnum.PASSWORD_NULL.getKey(), RegisterErrorEnum.PASSWORD_NULL.getMsg());
+            map.put(UserErrorEnum.PASSWORD_NULL.getKey(), UserErrorEnum.PASSWORD_NULL.getMsg());
             return map;
         }
         if (StringUtils.isBlank(user.getEmail())) {
-            map.put(RegisterErrorEnum.EMAIL_NULL.getKey(), RegisterErrorEnum.EMAIL_NULL.getMsg());
+            map.put(UserErrorEnum.EMAIL_NULL.getKey(), UserErrorEnum.EMAIL_NULL.getMsg());
             return map;
         }
 
         // 验证账号
         User u = userMapper.selectByName(user.getUsername());
         if (u != null) {
-            map.put(RegisterErrorEnum.USERNAME_EXIST.getKey(), RegisterErrorEnum.USERNAME_EXIST.getMsg());
+            map.put(UserErrorEnum.USERNAME_EXIST.getKey(), UserErrorEnum.USERNAME_EXIST.getMsg());
             return map;
         }
 
         // 验证邮箱
         u = userMapper.selectByEmail(user.getEmail());
         if (u != null) {
-            map.put(RegisterErrorEnum.EMAIL_EXIST.getKey(), RegisterErrorEnum.EMAIL_EXIST.getMsg());
+            map.put(UserErrorEnum.EMAIL_EXIST.getKey(), UserErrorEnum.EMAIL_EXIST.getMsg());
             return map;
         }
 
@@ -103,7 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 激活验证码
+     * 激活用户
      */
     @Override
     public int activation(int userId, String code) {
@@ -119,5 +124,61 @@ public class UserServiceImpl implements UserService {
         } else {
             return ActivationStatusConstant.ACTIVATION_FAILURE;
         }
+    }
+
+    /**
+     * 用户登录
+     */
+    public Map<String, Object> login(String username, String password, int expiredSeconds) {
+        Map<String, Object> map = new HashMap<>();
+
+        // 空值处理
+        if (StringUtils.isBlank(username)) {
+            map.put(UserErrorEnum.USERNAME_NULL.getKey(), UserErrorEnum.USERNAME_NULL.getMsg());
+            return map;
+        }
+        if (StringUtils.isBlank(password)) {
+            map.put(UserErrorEnum.PASSWORD_NULL.getKey(), UserErrorEnum.PASSWORD_NULL.getMsg());
+            return map;
+        }
+
+        // 验证账号
+        User user = userMapper.selectByName(username);
+        if (user == null) {
+            map.put(UserErrorEnum.USERNAME_NOT_EXIST.getKey(), UserErrorEnum.USERNAME_NOT_EXIST.getMsg());
+            return map;
+        }
+
+        // 验证状态
+        if (user.getStatus() == 0) {
+            map.put(UserErrorEnum.USERNAME_NOT_ACTIVATION.getKey(), UserErrorEnum.USERNAME_NOT_ACTIVATION.getMsg());
+            return map;
+        }
+
+        // 验证密码
+        password = CommunityUtil.md5(password + user.getSalt());
+        if (!user.getPassword().equals(password)) {
+            map.put(UserErrorEnum.PASSWORD_ERROR.getKey(), UserErrorEnum.PASSWORD_ERROR.getMsg());
+            return map;
+        }
+
+        // 生成登录凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicket.setStatus(LoginTicketStatusConstant.EFFECTIVE);
+        //过期时间  expiredSeconds * 1000L：转成毫秒
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000L));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+
+        map.put("ticket", loginTicket.getTicket());
+        return map;
+    }
+
+    /**
+     * 登出
+     */
+    public void logout(String ticket) {
+        loginTicketMapper.updateStatus(ticket, 1);
     }
 }

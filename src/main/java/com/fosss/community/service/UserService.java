@@ -25,4 +25,14 @@ public interface UserService {
      * 激活验证码
      */
     int activation(int userId, String code);
+
+    /**
+     * 用户登录
+     */
+    public Map<String, Object> login(String username, String password, int expiredSeconds);
+
+    /**
+     * 登出
+     */
+    public void logout(String ticket);
 }

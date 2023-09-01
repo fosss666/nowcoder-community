@@ -2,25 +2,31 @@ package com.fosss.community.controller;
 
 import com.fosss.community.constant.ActivationStatusConstant;
 import com.fosss.community.constant.ExceptionConstant;
-import com.fosss.community.constant.RegisterErrorEnum;
+import com.fosss.community.constant.UserErrorEnum;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.UserService;
 import com.google.code.kaptcha.Producer;
 import com.sun.org.apache.regexp.internal.RE;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+
+import static com.fosss.community.constant.ExpiredConstant.DEFAULT_EXPIRED_SECONDS;
+import static com.fosss.community.constant.ExpiredConstant.REMEMBER_EXPIRED_SECONDS;
 
 /**
  * @author: fosss
@@ -32,10 +38,14 @@ import java.util.Map;
 @Controller
 public class LoginController {
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
     @Resource
     private UserService userService;
     @Resource
     private Producer kaptchaProducer;
+
 
     /**
      * 跳转注册页面
@@ -64,9 +74,9 @@ public class LoginController {
             model.addAttribute("target", "/index");
             return "/site/operate-result";
         } else {
-            model.addAttribute(RegisterErrorEnum.USERNAME_NULL.getKey(), map.get(RegisterErrorEnum.USERNAME_NULL.getKey()));
-            model.addAttribute(RegisterErrorEnum.PASSWORD_NULL.getKey(), map.get(RegisterErrorEnum.PASSWORD_NULL.getKey()));
-            model.addAttribute(RegisterErrorEnum.EMAIL_NULL.getKey(), map.get(RegisterErrorEnum.EMAIL_NULL.getKey()));
+            model.addAttribute(UserErrorEnum.USERNAME_NULL.getKey(), map.get(UserErrorEnum.USERNAME_NULL.getKey()));
+            model.addAttribute(UserErrorEnum.PASSWORD_NULL.getKey(), map.get(UserErrorEnum.PASSWORD_NULL.getKey()));
+            model.addAttribute(UserErrorEnum.EMAIL_NULL.getKey(), map.get(UserErrorEnum.EMAIL_NULL.getKey()));
             return "/site/register";
         }
     }
@@ -113,5 +123,44 @@ public class LoginController {
         } catch (IOException e) {
             log.error(ExceptionConstant.CODE_IMAGE_ERROR + ":" + e.getMessage());
         }
+    }
+
+    /**
+     * 用户登录
+     */
+    @PostMapping(path = "/login")
+    public String login(String username, String password, String code, boolean rememberme,
+                        Model model, HttpSession session, HttpServletResponse response) {
+        // 检查验证码
+        String kaptcha = (String) session.getAttribute("kaptcha");
+        if (StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !kaptcha.equalsIgnoreCase(code)) {
+            model.addAttribute(UserErrorEnum.CODE_ERROR.getKey(), UserErrorEnum.CODE_ERROR.getMsg());
+            return "/site/login";
+        }
+
+        // 检查账号,密码
+        int expiredSeconds = rememberme ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
+        Map<String, Object> map = userService.login(username, password, expiredSeconds);
+        if (map.containsKey("ticket")) {
+            Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
+            cookie.setPath(contextPath);
+            cookie.setMaxAge(expiredSeconds);
+            response.addCookie(cookie);
+            //登录完成，重定向到首页
+            return "redirect:/index";
+        } else {
+            model.addAttribute("usernameMsg", map.get("usernameMsg"));
+            model.addAttribute("passwordMsg", map.get("passwordMsg"));
+            return "/site/login";
+        }
+    }
+
+    /**
+     * 登出
+     */
+    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+    public String logout(@CookieValue("ticket") String ticket) {
+        userService.logout(ticket);
+        return "redirect:/login";
     }
 }
