@@ -1,5 +1,6 @@
 package com.fosss.community.service;
 
+import com.fosss.community.entity.LoginTicket;
 import com.fosss.community.entity.User;
 
 import java.util.Map;
@@ -29,10 +30,16 @@ public interface UserService {
     /**
      * 用户登录
      */
-    public Map<String, Object> login(String username, String password, int expiredSeconds);
+    Map<String, Object> login(String username, String password, int expiredSeconds);
 
     /**
      * 登出
      */
-    public void logout(String ticket);
+    void logout(String ticket);
+
+    /**
+     * 根据ticket获取登录凭证
+     */
+    LoginTicket getByTicket(String ticket);
+
 }

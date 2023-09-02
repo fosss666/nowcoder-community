@@ -181,4 +181,12 @@ public class UserServiceImpl implements UserService {
     public void logout(String ticket) {
         loginTicketMapper.updateStatus(ticket, 1);
     }
+
+    /**
+     * 根据ticket获取登录凭证
+     */
+    @Override
+    public LoginTicket getByTicket(String ticket) {
+        return loginTicketMapper.selectByTicket(ticket);
+    }
 }

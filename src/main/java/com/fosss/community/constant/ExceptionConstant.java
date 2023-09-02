@@ -9,4 +9,5 @@ package com.fosss.community.constant;
 public class ExceptionConstant {
     public static final String MAIL_ERROR = "邮件发送失败";
     public static final String CODE_IMAGE_ERROR = "响应验证码失败";
+    public static final String PARAMETER_NULL = "参数不能为空";
 }
