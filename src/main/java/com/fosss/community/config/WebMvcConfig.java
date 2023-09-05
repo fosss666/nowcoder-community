@@ -1,5 +1,6 @@
 package com.fosss.community.config;
 
+import com.fosss.community.interceptor.LoginRequiredInterceptor;
 import com.fosss.community.interceptor.LoginTicketInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -18,6 +19,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Resource
     private LoginTicketInterceptor loginTicketInterceptor;
+    @Resource
+    private LoginRequiredInterceptor loginRequiredInterceptor;
 
     /**
      * 添加拦截器，配置拦截路径，放行静态资源
@@ -25,6 +28,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginTicketInterceptor)
+                .excludePathPatterns("/static/**");
+        registry.addInterceptor(loginRequiredInterceptor)
                 .excludePathPatterns("/static/**");
     }
 }

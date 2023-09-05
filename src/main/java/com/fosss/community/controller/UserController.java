@@ -1,5 +1,6 @@
 package com.fosss.community.controller;
 
+import com.fosss.community.annotation.LoginRequired;
 import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.entity.User;
 import com.fosss.community.exception.BusinessException;
@@ -44,6 +45,7 @@ public class UserController {
     /**
      * 跳转账号设置页面
      */
+    @LoginRequired
     @GetMapping("/setting")
     public String setting() {
         return "/site/setting";
@@ -52,6 +54,7 @@ public class UserController {
     /**
      * 上传头像
      */
+    @LoginRequired
     @PostMapping("/upload")
     public String upload(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
@@ -125,6 +128,7 @@ public class UserController {
     /**
      * 修改密码
      */
+    @LoginRequired
     @PostMapping(path = "/updatePassword")
     public String updatePassword(String oldPassword, String newPassword, Model model) {
         User user = threadLocalUtil.get();
