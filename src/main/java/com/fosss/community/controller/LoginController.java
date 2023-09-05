@@ -4,6 +4,7 @@ import com.fosss.community.constant.ActivationStatusConstant;
 import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.constant.UserErrorEnum;
 import com.fosss.community.entity.User;
+import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.UserService;
 import com.google.code.kaptcha.Producer;
 import com.sun.org.apache.regexp.internal.RE;
@@ -38,9 +39,8 @@ import static com.fosss.community.constant.ExpiredConstant.REMEMBER_EXPIRED_SECO
 @Controller
 public class LoginController {
 
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-
+    @Resource
+    private ApplicationProperty applicationProperty;
     @Resource
     private UserService userService;
     @Resource
@@ -143,7 +143,7 @@ public class LoginController {
         Map<String, Object> map = userService.login(username, password, expiredSeconds);
         if (map.containsKey("ticket")) {
             Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
-            cookie.setPath(contextPath);
+            cookie.setPath(applicationProperty.getContextPath());
             cookie.setMaxAge(expiredSeconds);
             response.addCookie(cookie);
             //登录完成，重定向到首页

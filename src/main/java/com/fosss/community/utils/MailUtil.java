@@ -1,11 +1,9 @@
 package com.fosss.community.utils;
 
 import com.fosss.community.constant.ExceptionConstant;
-import com.fosss.community.properties.MailProperty;
+import com.fosss.community.properties.ApplicationProperty;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMailMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +22,7 @@ import javax.mail.internet.MimeMessage;
 public class MailUtil {
 
     @Resource
-    private MailProperty mailProperty;
+    private ApplicationProperty mailProperty;
     @Resource
     private JavaMailSender javaMailSender;
 

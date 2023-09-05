@@ -1,6 +1,6 @@
 package com.fosss.community;
 
-import com.fosss.community.properties.MailProperty;
+import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.utils.MailUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 public class MailTest {
 
     @Resource
-    private MailProperty mailProperty;
+    private ApplicationProperty mailProperty;
     @Resource
     private MailUtil mailUtil;
     @Resource

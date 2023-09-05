@@ -38,5 +38,5 @@ logging:
 community:
   path:
     domain: http://localhost  #域名
-
+    uploadPath: E:/PROJECT/community/avaterImgs
 

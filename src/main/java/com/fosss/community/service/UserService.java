@@ -42,4 +42,16 @@ public interface UserService {
      */
     LoginTicket getByTicket(String ticket);
 
+    /**
+     * 更新用户头像
+     *
+     * @param userId
+     * @param avatarPath
+     */
+    void upload(int userId, String avatarPath);
+
+    /**
+     * 更新密码
+     */
+    Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword);
 }

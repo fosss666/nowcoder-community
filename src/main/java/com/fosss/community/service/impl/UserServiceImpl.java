@@ -8,12 +8,12 @@ import com.fosss.community.dao.LoginTicketMapper;
 import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.LoginTicket;
 import com.fosss.community.entity.User;
+import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
 import com.fosss.community.utils.MailUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -27,12 +27,6 @@ import java.util.Random;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Value("${community.path.domain}")
-    private String domain;
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-    @Value("${server.port}")
-    private int port;
 
     @Autowired
     private UserMapper userMapper;
@@ -42,6 +36,8 @@ public class UserServiceImpl implements UserService {
     private MailUtil mailUtil;
     @Resource
     private LoginTicketMapper loginTicketMapper;
+    @Resource
+    private ApplicationProperty applicationProperty;
 
 
     public User findUserById(int id) {
@@ -99,7 +95,7 @@ public class UserServiceImpl implements UserService {
         Context context = new Context();
         context.setVariable("email", user.getEmail());
         // http://localhost:8081/community/activation/101/code
-        String url = domain + ":" + port + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
+        String url = applicationProperty.getDomain() + ":" + applicationProperty.getPort() + applicationProperty.getContextPath() + "/activation/" + user.getId() + "/" + user.getActivationCode();
         context.setVariable("url", url);
         String content = templateEngine.process("/mail/activation", context);
         mailUtil.sendMail(user.getEmail(), "激活账号", content);
@@ -188,5 +184,74 @@ public class UserServiceImpl implements UserService {
     @Override
     public LoginTicket getByTicket(String ticket) {
         return loginTicketMapper.selectByTicket(ticket);
+    }
+
+    /**
+     * 更新用户头像
+     *
+     * @param userId
+     * @param avatarPath
+     */
+    @Override
+    public void upload(int userId, String avatarPath) {
+        userMapper.updateHeader(userId, avatarPath);
+    }
+
+    // 重置密码
+    public Map<String, Object> resetPassword(String email, String password) {
+        Map<String, Object> map = new HashMap<>();
+
+        // 空值处理
+        if (StringUtils.isBlank(email)) {
+            map.put("emailMsg", "邮箱不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(password)) {
+            map.put("passwordMsg", "密码不能为空!");
+            return map;
+        }
+
+        // 验证邮箱
+        User user = userMapper.selectByEmail(email);
+        if (user == null) {
+            map.put("emailMsg", "该邮箱尚未注册!");
+            return map;
+        }
+
+        // 重置密码
+        password = CommunityUtil.md5(password + user.getSalt());
+        userMapper.updatePassword(user.getId(), password);
+
+        map.put("user", user);
+        return map;
+    }
+
+    // 修改密码
+    public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
+        Map<String, Object> map = new HashMap<>();
+
+        // 空值处理
+        if (StringUtils.isBlank(oldPassword)) {
+            map.put("oldPasswordMsg", "原密码不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(newPassword)) {
+            map.put("newPasswordMsg", "新密码不能为空!");
+            return map;
+        }
+
+        // 验证原始密码
+        User user = userMapper.selectById(userId);
+        oldPassword = CommunityUtil.md5(oldPassword + user.getSalt());
+        if (!user.getPassword().equals(oldPassword)) {
+            map.put("oldPasswordMsg", "原密码输入有误!");
+            return map;
+        }
+
+        // 更新密码
+        newPassword = CommunityUtil.md5(newPassword + user.getSalt());
+        userMapper.updatePassword(userId, newPassword);
+
+        return map;
     }
 }
