@@ -19,4 +19,9 @@ public interface DiscussPostService {
      * 发布帖子
      */
     void insertDiscussPost(DiscussPost discussPost);
+
+    /**
+     * 查询帖子
+     */
+    DiscussPost selectById(int id);
 }

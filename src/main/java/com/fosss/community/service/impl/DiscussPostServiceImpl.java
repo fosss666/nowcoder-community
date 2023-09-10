@@ -46,4 +46,11 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         discussPostMapper.insertDiscussPost(discussPost);
     }
 
+    /**
+     * 查询帖子
+     */
+    @Override
+    public DiscussPost selectById(int id) {
+        return discussPostMapper.selectById(id);
+    }
 }

@@ -3,6 +3,8 @@ package com.fosss.community.dao;
 import com.fosss.community.entity.DiscussPost;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -19,4 +21,10 @@ public interface DiscussPostMapper {
      * 发布帖子
      */
     void insertDiscussPost(DiscussPost discussPost);
+
+    /**
+     * 查询帖子
+     */
+    @Select("select * from discuss_post where id=#{id}")
+    DiscussPost selectById(int id);
 }
