@@ -16,4 +16,11 @@ public class CommentConstant {
      * 实体类型: 评论
      */
     public static int ENTITY_TYPE_COMMENT = 2;
+
+    /**
+     * 评论状态
+     * 0：正常   1：被删除
+     */
+    public static final int COMMENT_NORMAL=0;
+    public static final int COMMENT_DELETED=1;
 }

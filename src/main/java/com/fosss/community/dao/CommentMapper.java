@@ -1,6 +1,7 @@
 package com.fosss.community.dao;
 
 import com.fosss.community.entity.Comment;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -28,4 +29,12 @@ public interface CommentMapper {
      * 条件查询评论的数量
      */
     int selectCountByEntity(int entityType, int entityId);
+
+    /**
+     * 添加评论
+     *
+     * @param comment
+     * @return
+     */
+    int insertComment(Comment comment);
 }

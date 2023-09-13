@@ -24,4 +24,12 @@ public interface DiscussPostService {
      * 查询帖子
      */
     DiscussPost selectById(int id);
+
+    /**
+     * 更新帖子评论数量
+     *
+     * @param entityId
+     * @param count
+     */
+    void updateCommentCount(int entityId, int count);
 }

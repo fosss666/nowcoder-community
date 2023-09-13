@@ -1,5 +1,6 @@
 package com.fosss.community.controller;
 
+import com.fosss.community.annotation.LoginRequired;
 import com.fosss.community.constant.ResultEnum;
 import com.fosss.community.entity.Comment;
 import com.fosss.community.entity.DiscussPost;
@@ -43,6 +44,7 @@ public class DiscussPostController {
     /**
      * 发布帖子
      */
+    @LoginRequired
     @PostMapping("/add")
     @ResponseBody
     public String addDiscussPost(DiscussPost discussPost) {

@@ -5,11 +5,17 @@ import com.fosss.community.entity.Comment;
 import com.fosss.community.service.CommentService;
 import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.utils.SensitiveFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
+
+import static com.fosss.community.constant.CommentConstant.ENTITY_TYPE_POST;
+import static com.fosss.community.constant.ExceptionConstant.PARAMETER_NULL;
 
 /**
  * @author: fosss
@@ -21,6 +27,10 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
     @Resource
     private CommentMapper commentMapper;
+    @Resource
+    private SensitiveFilter sensitiveFilter;
+    @Resource
+    private DiscussPostService discussPostService;
 
     /**
      * 分页查询评论
@@ -42,5 +52,27 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public int findCommentCount(int entityType, int entityId) {
         return commentMapper.selectCountByEntity(entityType, entityId);
+    }
+
+    /**
+     * 添加评论
+     */
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    @Override
+    public void addComment(Comment comment) {
+        if (comment == null) {
+            throw new IllegalArgumentException(PARAMETER_NULL);
+        }
+
+        // 添加评论
+        comment.setContent(HtmlUtils.htmlEscape(comment.getContent()));
+        comment.setContent(sensitiveFilter.filter(comment.getContent()));
+        commentMapper.insertComment(comment);
+
+        // 更新帖子评论数量
+        if (comment.getEntityType() == ENTITY_TYPE_POST) {
+            int count = commentMapper.selectCountByEntity(comment.getEntityType(), comment.getEntityId());
+            discussPostService.updateCommentCount(comment.getEntityId(), count);
+        }
     }
 }

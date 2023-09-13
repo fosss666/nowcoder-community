@@ -26,4 +26,9 @@ public interface CommentService {
      * 条件查询评论的数量
      */
     int findCommentCount(int entityType, int entityId);
+
+    /**
+     * 添加评论
+     */
+    void addComment(Comment comment);
 }
