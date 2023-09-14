@@ -136,3 +136,6 @@
 
   ![image-20230911121344790](https://cdn.jsdelivr.net/gh/fosss666/notebook/img/202309111213833.png)
 
+### 私信列表
+
+* sql的编写需要多理解，尤其是子查询的应用
