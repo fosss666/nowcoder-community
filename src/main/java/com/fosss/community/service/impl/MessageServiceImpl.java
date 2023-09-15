@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -67,4 +69,10 @@ public class MessageServiceImpl implements MessageService {
         messageMapper.insertMessage(message);
     }
 
+    /**
+     * 删除私信
+     */
+    public void deleteMessage(int id) {
+        messageMapper.updateMessageStatus(Collections.singletonList(id), MessageConstant.DELETED);
+    }
 }

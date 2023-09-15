@@ -34,4 +34,11 @@ public interface MessageService {
      * @param message
      */
     void addMessage(Message message);
+
+    /**
+     * 删除私信
+     *
+     * @param id
+     */
+    void deleteMessage(int id);
 }
