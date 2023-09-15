@@ -197,7 +197,9 @@ public class UserServiceImpl implements UserService {
         userMapper.updateHeader(userId, avatarPath);
     }
 
-    // 重置密码
+    /**
+     * 重置密码
+     */
     public Map<String, Object> resetPassword(String email, String password) {
         Map<String, Object> map = new HashMap<>();
 

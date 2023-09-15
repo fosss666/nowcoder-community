@@ -6,12 +6,16 @@ import com.fosss.community.constant.UserErrorEnum;
 import com.fosss.community.entity.User;
 import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.UserService;
+import com.fosss.community.utils.CommunityUtil;
+import com.fosss.community.utils.MailUtil;
 import com.google.code.kaptcha.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -42,6 +46,10 @@ public class LoginController {
     private UserService userService;
     @Resource
     private Producer kaptchaProducer;
+    @Resource
+    private TemplateEngine templateEngine;
+    @Resource
+    private MailUtil mailUtil;
 
 
     /**
@@ -155,9 +163,62 @@ public class LoginController {
     /**
      * 登出
      */
-    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+    @GetMapping(path = "/logout")
     public String logout(@CookieValue("ticket") String ticket) {
         userService.logout(ticket);
         return "redirect:/login";
+    }
+
+    /**
+     * 忘记密码页面
+     */
+    @GetMapping(path = "/forget")
+    public String getForgetPage() {
+        return "/site/forget";
+    }
+
+    /**
+     * 获取验证码
+     */
+    @GetMapping(path = "/forget/code")
+    @ResponseBody
+    public String getForgetCode(String email, HttpSession session) {
+        if (StringUtils.isBlank(email)) {
+            return CommunityUtil.getJSONString(1, "邮箱不能为空！");
+        }
+
+        // 发送邮件
+        Context context = new Context();
+        context.setVariable("email", email);
+        String code = CommunityUtil.generateUUID().substring(0, 4);
+        context.setVariable("verifyCode", code);
+        String content = templateEngine.process("/mail/forget", context);
+        mailUtil.sendMail(email, "找回密码", content);
+
+        // 保存验证码
+        session.setAttribute("verifyCode", code);
+
+        return CommunityUtil.getJSONString(0);
+    }
+
+    /**
+     * 重置密码
+     */
+    @PostMapping(path = "/forget/password")
+    public String resetPassword(String email, String verifyCode, String password, Model model, HttpSession session) {
+        String code = (String) session.getAttribute("verifyCode");
+        if (StringUtils.isBlank(verifyCode) || StringUtils.isBlank(code) || !code.equalsIgnoreCase(verifyCode)) {
+            model.addAttribute("codeMsg", "验证码错误!");
+            return "/site/forget";
+        }
+
+        Map<String, Object> map = userService.resetPassword(email, password);
+        if (map.containsKey("user")) {
+            return "redirect:/login";
+        } else {
+            model.addAttribute("emailMsg", map.get("emailMsg"));
+            model.addAttribute("passwordMsg", map.get("passwordMsg"));
+            return "/site/forget";
+        }
     }
 }

@@ -62,4 +62,13 @@ public interface UserService {
      * @return
      */
     User findUserByName(String targetName);
+
+    /**
+     * 重置密码
+     *
+     * @param email
+     * @param password
+     * @return
+     */
+    Map<String, Object> resetPassword(String email, String password);
 }
