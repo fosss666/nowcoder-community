@@ -1,5 +1,6 @@
 package com.fosss.community.controller;
 
+import com.fosss.community.constant.ResultEnum;
 import com.fosss.community.entity.Message;
 import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
@@ -93,6 +94,12 @@ public class MessageController {
         return "/site/letter-detail";
     }
 
+    /**
+     * 获取当前用户对话的人
+     *
+     * @param conversationId 会话id
+     * @return
+     */
     private User getLetterTarget(String conversationId) {
         String[] ids = conversationId.split("_");
         int id0 = Integer.parseInt(ids[0]);
@@ -105,6 +112,12 @@ public class MessageController {
         }
     }
 
+    /**
+     * 获取正在读的消息id
+     *
+     * @param letterList
+     * @return
+     */
     private List<Integer> getLetterIds(List<Message> letterList) {
         List<Integer> ids = new ArrayList<>();
 
@@ -115,8 +128,31 @@ public class MessageController {
                 }
             }
         }
-
         return ids;
+    }
+
+    /**
+     * 发送私信
+     */
+    @PostMapping("/letter/send")
+    @ResponseBody
+    public String sendMessage(String toName, String content) {
+        //查询目标用户
+        User target = userService.findUserByName(toName);
+        if (target == null) {
+            return CommunityUtil.getJSONString(ResultEnum.USER_NOT_FOUND.code, ResultEnum.USER_NOT_FOUND.msg);
+        }
+        int toId = target.getId();
+        int fromId = threadLocalUtil.get().getId();
+        Message message = new Message();
+        message.setToId(toId);
+        message.setFromId(fromId);
+        message.setContent(content);
+        message.setCreateTime(new Date());
+        String conversationId = toId < fromId ? toId + "_" + fromId : fromId + "_" + toId;
+        message.setConversationId(conversationId);
+        messageService.addMessage(message);
+        return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code);
     }
 
 }

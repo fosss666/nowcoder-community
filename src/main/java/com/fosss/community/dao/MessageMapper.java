@@ -3,6 +3,7 @@ package com.fosss.community.dao;
 import com.fosss.community.entity.Message;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Property;
 import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
@@ -57,4 +58,11 @@ public interface MessageMapper {
      * @param ids
      */
     void updateMessageStatus(List<Integer> ids, int status);
+
+    /**
+     * 添加消息
+     *
+     * @param message
+     */
+    void insertMessage(Message message);
 }

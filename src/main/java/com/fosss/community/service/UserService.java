@@ -54,4 +54,12 @@ public interface UserService {
      * 更新密码
      */
     Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword);
+
+    /**
+     * 根据用户名查询用户
+     *
+     * @param targetName
+     * @return
+     */
+    User findUserByName(String targetName);
 }

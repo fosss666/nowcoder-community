@@ -7,17 +7,18 @@ package com.fosss.community.constant;
  * Description:
  */
 public enum ResultEnum {
-    SUCCESS(0,"成功"),
-    PERMISSION_ERROR(403,"您还没有登录哦！");
+    SUCCESS(0, "成功"),
+    USER_NOT_FOUND(1, "用户名不存在!"),
+    PERMISSION_ERROR(403, "您还没有登录哦！");
 
     //code
     public int code;
     //msg
     public String msg;
 
-    ResultEnum(int code, String msg){
-        this.code=code;
-        this.msg=msg;
+    ResultEnum(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
     }
 
 }

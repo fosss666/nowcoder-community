@@ -21,6 +21,8 @@ import java.util.List;
 public class MessageServiceImpl implements MessageService {
     @Resource
     private MessageMapper messageMapper;
+    @Resource
+    private SensitiveFilter sensitiveFilter;
 
     public List<Message> findConversations(int userId, int offset, int limit) {
         return messageMapper.selectConversations(userId, offset, limit);
@@ -50,6 +52,19 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void readMessage(List<Integer> ids) {
         messageMapper.updateMessageStatus(ids, MessageConstant.ALREADY_READ);
+    }
+
+    /**
+     * 添加消息
+     *
+     * @param message
+     */
+    @Override
+    public void addMessage(Message message) {
+        String s = HtmlUtils.htmlEscape(message.getContent());
+        String filter = sensitiveFilter.filter(s);
+        message.setContent(filter);
+        messageMapper.insertMessage(message);
     }
 
 }

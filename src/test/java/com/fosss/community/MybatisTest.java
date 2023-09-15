@@ -2,9 +2,11 @@ package com.fosss.community;
 
 import com.fosss.community.dao.DiscussPostMapper;
 import com.fosss.community.dao.LoginTicketMapper;
+import com.fosss.community.dao.MessageMapper;
 import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.DiscussPost;
 import com.fosss.community.entity.LoginTicket;
+import com.fosss.community.entity.Message;
 import com.fosss.community.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +31,15 @@ public class MybatisTest {
     private DiscussPostMapper discussPostMapper;
     @Resource
     private LoginTicketMapper loginTicketMapper;
+    @Resource
+    private MessageMapper messageMapper;
+
+    @Test
+    void testInsertMessage() {
+        Message message = new Message();
+        message.setConversationId("test");
+        messageMapper.insertMessage(message);
+    }
 
     @Test
     void testSearchById() {

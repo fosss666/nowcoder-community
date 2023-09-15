@@ -6,6 +6,9 @@
     <sql id="selectFields">
         id, from_id, to_id, conversation_id, content, status, create_time
     </sql>
+    <sql id="insertFields">
+        from_id, to_id, conversation_id, content, status, create_time
+    </sql>
 
     <!--查询当前用户的会话列表,针对每个会话只返回一条最新的私信.   from_id=1为系统通知   子查询：查询每个会话最新的一条私信id-->
     <select id="selectConversations" resultType="com.fosss.community.entity.Message">
@@ -79,6 +82,12 @@
             #{id}
         </foreach>
     </update>
+
+    <!--添加消息-->
+    <insert id="insertMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into message(<include refid="insertFields"/>)
+        values (#{fromId},#{toId},#{conversationId},#{content},#{status},#{createTime})
+    </insert>
 </mapper>
 
 

@@ -27,4 +27,11 @@ public interface MessageService {
      * @param ids
      */
     void readMessage(List<Integer> ids);
+
+    /**
+     * 添加消息
+     *
+     * @param message
+     */
+    void addMessage(Message message);
 }

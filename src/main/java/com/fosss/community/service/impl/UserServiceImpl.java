@@ -254,4 +254,15 @@ public class UserServiceImpl implements UserService {
 
         return map;
     }
+
+    /**
+     * 根据用户名查询用户
+     *
+     * @param targetName
+     * @return
+     */
+    @Override
+    public User findUserByName(String targetName) {
+        return userMapper.selectByName(targetName);
+    }
 }
