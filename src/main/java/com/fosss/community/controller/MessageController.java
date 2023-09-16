@@ -162,6 +162,6 @@ public class MessageController {
     @ResponseBody
     public String deleteLetter(int id) {
         messageService.deleteMessage(id);
-        return CommunityUtil.getJSONString(0);
+        return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code);
     }
 }

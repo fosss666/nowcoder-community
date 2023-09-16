@@ -2,6 +2,7 @@ package com.fosss.community.controller;
 
 import com.fosss.community.constant.ActivationStatusConstant;
 import com.fosss.community.constant.ExceptionConstant;
+import com.fosss.community.constant.ResultEnum;
 import com.fosss.community.constant.UserErrorEnum;
 import com.fosss.community.entity.User;
 import com.fosss.community.properties.ApplicationProperty;
@@ -184,8 +185,11 @@ public class LoginController {
     @ResponseBody
     public String getForgetCode(String email, HttpSession session) {
         if (StringUtils.isBlank(email)) {
-            return CommunityUtil.getJSONString(1, "邮箱不能为空！");
+            return CommunityUtil.getJSONString(ResultEnum.EMAIL_NULL.code, ResultEnum.EMAIL_NULL.msg);
         }
+
+        //查询邮箱是否注册
+        User user = userService.findUserByEmail(email);
 
         // 发送邮件
         Context context = new Context();
@@ -198,7 +202,7 @@ public class LoginController {
         // 保存验证码
         session.setAttribute("verifyCode", code);
 
-        return CommunityUtil.getJSONString(0);
+        return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code);
     }
 
     /**

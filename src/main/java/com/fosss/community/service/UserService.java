@@ -71,4 +71,12 @@ public interface UserService {
      * @return
      */
     Map<String, Object> resetPassword(String email, String password);
+
+    /**
+     * 根据邮箱查询用户
+     *
+     * @param email
+     * @return
+     */
+    User findUserByEmail(String email);
 }

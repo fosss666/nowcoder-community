@@ -267,4 +267,13 @@ public class UserServiceImpl implements UserService {
     public User findUserByName(String targetName) {
         return userMapper.selectByName(targetName);
     }
+
+    /**
+     * 根据邮箱查询用户
+     */
+
+    @Override
+    public User findUserByEmail(String email) {
+        return userMapper.selectByEmail(email);
+    }
 }
