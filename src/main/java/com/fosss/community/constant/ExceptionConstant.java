@@ -14,4 +14,5 @@ public class ExceptionConstant {
     public static final String FILE_FORMAT_ERROR = "文件格式错误";
     public static final String FILE_UPLOAD_ERROR = "上传文件失败,服务器发生异常!";
     public static final String FILE_READ_ERROR = "读取文件失败！";
+    public static final String SERVER_EXCEPTION = "服务器异常！";
 }
