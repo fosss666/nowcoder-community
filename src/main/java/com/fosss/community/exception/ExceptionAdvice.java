@@ -1,9 +1,10 @@
-package com.fosss.community.advice;
+package com.fosss.community.exception;
 
 import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.constant.ResultEnum;
 import com.fosss.community.utils.CommunityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -19,10 +20,10 @@ import java.io.PrintWriter;
  * Description:
  */
 @Slf4j
-@ControllerAdvice
+@ControllerAdvice(annotations = Controller.class)
 public class ExceptionAdvice {
 
-    @ExceptionHandler
+    @ExceptionHandler({Exception.class})
     public void exceptionHandler(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.error(ExceptionConstant.SERVER_EXCEPTION + ":" + e.getMessage());
         for (StackTraceElement element : e.getStackTrace()) {
