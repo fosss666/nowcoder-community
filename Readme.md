@@ -139,3 +139,7 @@
 ### 私信列表
 
 * sql的编写需要多理解，尤其是子查询的应用
+
+### redis
+
+* [redis常用操作](https://fosss666.github.io/2023/08/07/Redis%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html?_sw-precache=96f3eef89475d2b6ce0c83b4709705c0)
