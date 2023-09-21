@@ -143,3 +143,26 @@
 ### redis
 
 * [redis常用操作](https://fosss666.github.io/2023/08/07/Redis%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html?_sw-precache=96f3eef89475d2b6ce0c83b4709705c0)
+* java整合redis时，注意多次访问同一个key可以这样做：
+```java
+BoundValueOperations operations = redisTemplate.boundValueOps(redisKey);
+```
+* redis中的事务多使用编程实现，实现代码：
+```java
+Object obj = redisTemplate.execute(new SessionCallback() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                String redisKey = "test:tx";
+
+                operations.multi();
+
+                operations.opsForSet().add(redisKey, "zhangsan");
+                operations.opsForSet().add(redisKey, "lisi");
+                operations.opsForSet().add(redisKey, "wangwu");
+
+                System.out.println(operations.opsForSet().members(redisKey));
+
+                return operations.exec();
+            }
+        });
+```

@@ -15,6 +15,10 @@ spring:
     url: jdbc:mysql://192.168.113.128:3306/community?characterEncoding=utf-8&useSSL=false&serverTimezone=Hongkong
     username: root
     password: 123456
+  redis: #配置redis
+    database: 1  #用那个库，默认16个，默认使用第1个
+    host: 192.168.113.128
+    port: 6379
 #  mail: # 邮件 配置在yaml文件中
 #    host: smtp.163.com
 #    username: ggrxhskd@163.com
@@ -39,4 +43,3 @@ community:
   path:
     domain: http://localhost  #域名
     uploadPath: E:/PROJECT/community/avaterImgs
-
