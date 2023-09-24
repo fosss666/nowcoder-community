@@ -73,7 +73,7 @@
         maximum-pool-size: 15 #最大连接数量
         minimum-idle: 5 #最少连接数
       type: com.zaxxer.hikari.HikariDataSource
-      url: jdbc:mysql://192.168.113.128:3306/community?characterEncoding=utf-8&useSSL=false&serverTimezone=Hongkong
+      url: jdbc:mysql://192.168.60.129:3306/community?characterEncoding=utf-8&useSSL=false&serverTimezone=Hongkong
       username: root
       password: 123456
   mybatis:

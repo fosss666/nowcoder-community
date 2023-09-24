@@ -1,6 +1,7 @@
 package com.fosss.community.controller;
 
 import com.fosss.community.annotation.LoginRequired;
+import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.constant.ResultEnum;
 import com.fosss.community.entity.Comment;
 import com.fosss.community.entity.DiscussPost;
@@ -8,6 +9,7 @@ import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.CommentService;
 import com.fosss.community.service.DiscussPostService;
+import com.fosss.community.service.LikeService;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
@@ -40,6 +42,8 @@ public class DiscussPostController {
     private UserService userService;
     @Resource
     private CommentService commentService;
+    @Resource
+    private LikeService likeService;
 
     /**
      * 发布帖子
@@ -70,6 +74,13 @@ public class DiscussPostController {
         User user = userService.findUserById(discussPost.getUserId());
         model.addAttribute("user", user);
 
+        //点赞数量
+        int likeCount = likeService.getLikeCount(ENTITY_TYPE_POST, id);
+        model.addAttribute("likeCount", likeCount);
+        //点赞状态
+        int likeStatus = threadLocalUtil.get() == null ? LikeConstant.NOT_LIKED : likeService.getLikeStatusByUserId(threadLocalUtil.get().getId(), ENTITY_TYPE_POST, id);
+        model.addAttribute("likeStatus", likeStatus);
+
         // 评论分页信息
         page.setLimit(5);
         page.setPath("/discuss/detail/" + id);
@@ -85,6 +96,13 @@ public class DiscussPostController {
         if (commentList != null) {
             commentVoList = commentList.stream().map(comment -> {
                 Map<String, Object> commentVo = new HashMap<>();
+                //点赞数量
+                int likeCount2 = likeService.getLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
+                commentVo.put("likeCount", likeCount2);
+                //点赞状态
+                int likeStatus2 = threadLocalUtil.get() == null ? 0 : likeService.getLikeStatusByUserId(threadLocalUtil.get().getId(), ENTITY_TYPE_COMMENT, comment.getId());
+                commentVo.put("likeStatus", likeStatus2);
+
                 // 评论
                 commentVo.put("comment", comment);
                 // 作者
@@ -98,6 +116,13 @@ public class DiscussPostController {
                 if (replyList != null) {
                     replyVoList = replyList.stream().map(reply -> {
                         Map<String, Object> replyVo = new HashMap<>();
+                        //点赞数量
+                        int likeCount3 = likeService.getLikeCount(ENTITY_TYPE_COMMENT, reply.getId());
+                        replyVo.put("likeCount", likeCount3);
+                        //点赞状态
+                        int likeStatus3 = threadLocalUtil.get() == null ? 0 : likeService.getLikeStatusByUserId(threadLocalUtil.get().getId(), ENTITY_TYPE_COMMENT, reply.getId());
+                        replyVo.put("likeStatus", likeStatus3);
+
                         // 回复
                         replyVo.put("reply", reply);
                         // 作者

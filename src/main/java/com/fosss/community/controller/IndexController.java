@@ -1,14 +1,18 @@
 package com.fosss.community.controller;
 
+import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.dao.DiscussPostMapper;
 import com.fosss.community.entity.DiscussPost;
 import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.DiscussPostService;
+import com.fosss.community.service.LikeService;
 import com.fosss.community.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -29,6 +33,8 @@ public class IndexController {
     private UserService userService;
     @Resource
     private DiscussPostService discussPostService;
+    @Resource
+    private LikeService likeService;
 
     /**
      * 查询首页
@@ -47,6 +53,8 @@ public class IndexController {
             map.put("post", discussPost);
             User user = userService.findUserById(discussPost.getUserId());
             map.put("user", user);
+            int likeCount = likeService.getLikeCount(LikeConstant.ENTITY_TYPE_POST, discussPost.getId());
+            map.put("likeCount", likeCount);
             return map;
         }).collect(Collectors.toList());
 
