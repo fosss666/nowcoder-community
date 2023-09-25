@@ -75,7 +75,7 @@ public class DiscussPostController {
         model.addAttribute("user", user);
 
         //点赞数量
-        int likeCount = likeService.getLikeCount(ENTITY_TYPE_POST, id);
+        int likeCount = likeService.getEntityLikeCount(ENTITY_TYPE_POST, id);
         model.addAttribute("likeCount", likeCount);
         //点赞状态
         int likeStatus = threadLocalUtil.get() == null ? LikeConstant.NOT_LIKED : likeService.getLikeStatusByUserId(threadLocalUtil.get().getId(), ENTITY_TYPE_POST, id);
@@ -97,7 +97,7 @@ public class DiscussPostController {
             commentVoList = commentList.stream().map(comment -> {
                 Map<String, Object> commentVo = new HashMap<>();
                 //点赞数量
-                int likeCount2 = likeService.getLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
+                int likeCount2 = likeService.getEntityLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
                 commentVo.put("likeCount", likeCount2);
                 //点赞状态
                 int likeStatus2 = threadLocalUtil.get() == null ? 0 : likeService.getLikeStatusByUserId(threadLocalUtil.get().getId(), ENTITY_TYPE_COMMENT, comment.getId());
@@ -117,7 +117,7 @@ public class DiscussPostController {
                     replyVoList = replyList.stream().map(reply -> {
                         Map<String, Object> replyVo = new HashMap<>();
                         //点赞数量
-                        int likeCount3 = likeService.getLikeCount(ENTITY_TYPE_COMMENT, reply.getId());
+                        int likeCount3 = likeService.getEntityLikeCount(ENTITY_TYPE_COMMENT, reply.getId());
                         replyVo.put("likeCount", likeCount3);
                         //点赞状态
                         int likeStatus3 = threadLocalUtil.get() == null ? 0 : likeService.getLikeStatusByUserId(threadLocalUtil.get().getId(), ENTITY_TYPE_COMMENT, reply.getId());

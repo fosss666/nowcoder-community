@@ -5,11 +5,14 @@ import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.entity.User;
 import com.fosss.community.exception.BusinessException;
 import com.fosss.community.properties.ApplicationProperty;
+import com.fosss.community.service.LikeService;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
+import com.fosss.community.utils.RedisKeyUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +44,8 @@ public class UserController {
     private ApplicationProperty applicationProperty;
     @Resource
     private ThreadLocalUtil threadLocalUtil;
+    @Resource
+    private LikeService likeService;
 
     /**
      * 跳转账号设置页面
@@ -141,4 +146,23 @@ public class UserController {
             return "/site/setting";
         }
     }
+
+    /**
+     * 个人主页
+     */
+    @GetMapping("/profile/{userId}")
+    public String profile(@PathVariable("userId") int userId, Model model) {
+        //查询用户信息
+        User user = userService.findUserById(userId);
+        //判断用户是否存在
+        if (user == null) throw new BusinessException(ExceptionConstant.USER_NOT_FOUND);
+        model.addAttribute("user", user);
+        //点赞数量
+        int likeCount = likeService.getUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+
+        //跳转到个人主页
+        return "/site/profile";
+    }
+
 }

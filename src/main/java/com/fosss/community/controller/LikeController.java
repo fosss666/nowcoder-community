@@ -30,6 +30,14 @@ public class LikeController {
     @Resource
     private LikeService likeService;
 
+    /**
+     * 点赞
+     *
+     * @param entityType   实体类型：1帖子  2评论
+     * @param entityId     实体id
+     * @param entityUserId 实体的用户id
+     * @return
+     */
     @PostMapping(path = "/like")
     @ResponseBody
     @LoginRequired
@@ -37,10 +45,10 @@ public class LikeController {
         User user = threadLocalUtil.get();
 
         // 点赞
-        likeService.like(user.getId(), entityType, entityId);
+        likeService.like(user.getId(), entityType, entityId, entityUserId);
 
         // 数量
-        long likeCount = likeService.getLikeCount(entityType, entityId);
+        long likeCount = likeService.getEntityLikeCount(entityType, entityId);
         // 状态
         int likeStatus = likeService.getLikeStatusByUserId(user.getId(), entityType, entityId);
         // 返回的结果

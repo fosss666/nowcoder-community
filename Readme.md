@@ -148,6 +148,8 @@
 BoundValueOperations operations = redisTemplate.boundValueOps(redisKey);
 ```
 * redis中的事务多使用编程实现，实现代码：
+
+  ___如果要进行查询操作的话，应该放到事务之外执行，如放到multi方法执行之前。否则查询操作会等到事务提交之后才进行，导致查询的结果为空___
 ```java
 Object obj = redisTemplate.execute(new SessionCallback() {
             @Override

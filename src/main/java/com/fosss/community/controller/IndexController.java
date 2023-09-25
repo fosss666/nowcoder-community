@@ -53,7 +53,7 @@ public class IndexController {
             map.put("post", discussPost);
             User user = userService.findUserById(discussPost.getUserId());
             map.put("user", user);
-            int likeCount = likeService.getLikeCount(LikeConstant.ENTITY_TYPE_POST, discussPost.getId());
+            int likeCount = likeService.getEntityLikeCount(LikeConstant.ENTITY_TYPE_POST, discussPost.getId());
             map.put("likeCount", likeCount);
             return map;
         }).collect(Collectors.toList());
