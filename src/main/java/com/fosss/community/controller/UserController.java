@@ -2,9 +2,11 @@ package com.fosss.community.controller;
 
 import com.fosss.community.annotation.LoginRequired;
 import com.fosss.community.constant.ExceptionConstant;
+import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.entity.User;
 import com.fosss.community.exception.BusinessException;
 import com.fosss.community.properties.ApplicationProperty;
+import com.fosss.community.service.FollowService;
 import com.fosss.community.service.LikeService;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
@@ -46,6 +48,8 @@ public class UserController {
     private ThreadLocalUtil threadLocalUtil;
     @Resource
     private LikeService likeService;
+    @Resource
+    private FollowService followService;
 
     /**
      * 跳转账号设置页面
@@ -161,6 +165,18 @@ public class UserController {
         int likeCount = likeService.getUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
 
+        //关注数量
+        long followeeCount = followService.getFolloweeCount(userId, LikeConstant.ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        //粉丝数量
+        long followerCount = followService.getFollowerCount(userId, LikeConstant.ENTITY_TYPE_USER);
+        model.addAttribute("followerCount", followerCount);
+        //当前用户是否已关注目前访问的用户
+        boolean hasFollowed = false;
+        if (threadLocalUtil.get() != null) {
+            hasFollowed = followService.hasFollowed(threadLocalUtil.get().getId(), userId, LikeConstant.ENTITY_TYPE_USER);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
         //跳转到个人主页
         return "/site/profile";
     }

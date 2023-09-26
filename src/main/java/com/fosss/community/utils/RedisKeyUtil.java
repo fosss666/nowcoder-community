@@ -9,15 +9,17 @@ package com.fosss.community.utils;
 public class RedisKeyUtil {
 
     private static final String SPLIT = ":";
-    private static final String ENTITY_PREFIX = "like:entity";
-    private static final String USER_PREFIX = "like:user";
+    private static final String PREFIX_LIKE_ENTITY = "like:entity";
+    private static final String PREFIX_LIKE_USER = "like:user";
+    private static final String PREFIX_FOLLOWEE = "followee";
+    private static final String PREFIX_FOLLOWER = "follower";
 
     /**
      * 生成某个实体点赞的key
      * like:entity:entityType:entityId -> set(userId)
      */
     public static String generateEntityLikeKey(int entityType, int entityId) {
-        return ENTITY_PREFIX + SPLIT + entityType + SPLIT + entityId;
+        return PREFIX_LIKE_ENTITY + SPLIT + entityType + SPLIT + entityId;
     }
 
     /**
@@ -25,6 +27,22 @@ public class RedisKeyUtil {
      * like:user:userId -> int
      */
     public static String generateUserLikeKey(int userId) {
-        return USER_PREFIX + SPLIT + userId;
+        return PREFIX_LIKE_USER + SPLIT + userId;
+    }
+
+    /**
+     * 生成关注的key
+     * followee:userId:entityType -> zset(entityId,now)
+     */
+    public static String generateFolloweeKey(int userId, int entityType) {
+        return PREFIX_FOLLOWEE + SPLIT + userId + SPLIT + entityType;
+    }
+
+    /**
+     * 生成粉丝的key
+     * follower:entityType:entityId -> zset(userId,now)
+     */
+    public static String generateFollowerKey(int entityType, int entityId) {
+        return PREFIX_FOLLOWER + SPLIT + entityType + SPLIT + entityId;
     }
 }

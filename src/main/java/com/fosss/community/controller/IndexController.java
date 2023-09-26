@@ -7,7 +7,9 @@ import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
 import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.service.LikeService;
+import com.fosss.community.service.MessageService;
 import com.fosss.community.service.UserService;
+import com.fosss.community.utils.ThreadLocalUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,10 @@ public class IndexController {
     private DiscussPostService discussPostService;
     @Resource
     private LikeService likeService;
+    @Resource
+    private ThreadLocalUtil threadLocalUtil;
+    @Resource
+    private MessageService messageService;
 
     /**
      * 查询首页
@@ -53,12 +59,18 @@ public class IndexController {
             map.put("post", discussPost);
             User user = userService.findUserById(discussPost.getUserId());
             map.put("user", user);
+            //点赞数
             int likeCount = likeService.getEntityLikeCount(LikeConstant.ENTITY_TYPE_POST, discussPost.getId());
             map.put("likeCount", likeCount);
             return map;
         }).collect(Collectors.toList());
 
         model.addAttribute("discussPosts", discussPosts);
+        //查询未读消息数
+        if (threadLocalUtil.get() != null) {
+            int letterUnreadCount = messageService.findLetterUnreadCount(threadLocalUtil.get().getId(), null);
+            model.addAttribute("letterUnreadCount", letterUnreadCount);
+        }
 
         return "/index";
     }
