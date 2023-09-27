@@ -1,7 +1,11 @@
 package com.fosss.community.service.impl;
 
+import com.fosss.community.constant.LikeConstant;
+import com.fosss.community.entity.User;
 import com.fosss.community.service.FollowService;
+import com.fosss.community.service.UserService;
 import com.fosss.community.utils.RedisKeyUtil;
+import org.aspectj.apache.bcel.util.ClassLoaderRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -9,6 +13,8 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author: fosss
@@ -21,6 +27,8 @@ public class FollowServiceImpl implements FollowService {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private UserService userService;
 
     /**
      * 关注
@@ -120,6 +128,50 @@ public class FollowServiceImpl implements FollowService {
         //有分数则说明关注了
         Double score = redisTemplate.opsForZSet().score(followeeKey, curUserId);
         return score != null;
+    }
+
+    /**
+     * 获取关注列表
+     */
+    @Override
+    public List<Map<String, Object>> getFollowees(int userId, int offset, int limit) {
+        String followeeKey = RedisKeyUtil.generateFolloweeKey(userId, LikeConstant.ENTITY_TYPE_USER);
+        //按分数倒序获得关注的用户id
+        Set<Object> ids = redisTemplate.opsForZSet().reverseRange(followeeKey, offset, offset + limit - 1);
+        if (ids == null) return null;
+
+        //查询用户详情
+        List<Map<String, Object>> list = ids.stream().map(id -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("user", userService.findUserById((int) id));
+            //封装关注的时间
+            Double score = redisTemplate.opsForZSet().score(followeeKey, id);
+            map.put("followTime", new Date(score.longValue()));
+            return map;
+        }).collect(Collectors.toList());
+        return list;
+    }
+
+    /**
+     * 获取粉丝列表
+     */
+    @Override
+    public List<Map<String, Object>> getFollowers(int userId, int offset, int limit) {
+        String followerKey = RedisKeyUtil.generateFollowerKey(LikeConstant.ENTITY_TYPE_USER, userId);
+        //按分数倒序获得关注的用户id
+        Set<Object> ids = redisTemplate.opsForZSet().reverseRange(followerKey, offset, offset + limit - 1);
+        if (ids == null) return null;
+
+        //查询用户详情
+        List<Map<String, Object>> list = ids.stream().map(id -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("user", userService.findUserById((int) id));
+            //封装关注的时间
+            Double score = redisTemplate.opsForZSet().score(followerKey, id);
+            map.put("followTime", new Date(score.longValue()));
+            return map;
+        }).collect(Collectors.toList());
+        return list;
     }
 }
 

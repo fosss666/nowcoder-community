@@ -1,5 +1,8 @@
 package com.fosss.community.service;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author: fosss
  * Date: 2023/9/26
@@ -52,4 +55,14 @@ public interface FollowService {
      * @return
      */
     boolean hasFollowed(int loginUserId, int curUserId, int entityTypeUser);
+
+    /**
+     * 获取关注列表
+     */
+    List<Map<String, Object>> getFollowees(int userId, int offset, int limit);
+
+    /**
+     * 获取粉丝列表
+     */
+    List<Map<String, Object>> getFollowers(int userId, int offset, int limit);
 }
