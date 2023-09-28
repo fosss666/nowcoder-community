@@ -3,9 +3,12 @@ package com.fosss.community.controller;
 import com.fosss.community.annotation.LoginRequired;
 import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.constant.LikeConstant;
+import com.fosss.community.entity.DiscussPost;
+import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
 import com.fosss.community.exception.BusinessException;
 import com.fosss.community.properties.ApplicationProperty;
+import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.service.FollowService;
 import com.fosss.community.service.LikeService;
 import com.fosss.community.service.UserService;
@@ -27,7 +30,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static com.fosss.community.constant.LikeConstant.ENTITY_TYPE_POST;
 
 /**
  * @author: fosss
@@ -50,6 +58,8 @@ public class UserController {
     private LikeService likeService;
     @Resource
     private FollowService followService;
+    @Resource
+    private DiscussPostService discussPostService;
 
     /**
      * 跳转账号设置页面
@@ -181,4 +191,37 @@ public class UserController {
         return "/site/profile";
     }
 
+    /**
+     * 我的帖子
+     */
+    @GetMapping("/mypost/{userId}")
+    public String getMyPost(@PathVariable("userId") int userId, Page page, Model model) {
+        //查询用户信息
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new BusinessException(ExceptionConstant.USER_NOT_FOUND);
+        }
+        model.addAttribute("user", user);
+
+        // 分页信息
+        page.setPath("/user/mypost/" + userId);
+        page.setRows(discussPostService.findDiscussPostRows(userId));
+
+        // 帖子列表
+        List<DiscussPost> discussList = discussPostService
+                .findDiscussPosts(userId, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> discussVOList = new ArrayList<>();
+        if (discussList != null) {
+            for (DiscussPost post : discussList) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("discussPost", post);
+                //点赞数
+                map.put("likeCount", likeService.getEntityLikeCount(ENTITY_TYPE_POST, post.getId()));
+                discussVOList.add(map);
+            }
+        }
+        model.addAttribute("discussPosts", discussVOList);
+
+        return "/site/my-post";
+    }
 }
