@@ -31,4 +31,19 @@ public interface CommentService {
      * 添加评论
      */
     void addComment(Comment comment);
+
+    /**
+     * 查询用户回复的数量
+     */
+    int findUserCount(int userId);
+
+    /**
+     * 查询用户的回复
+     *
+     * @param userId
+     * @param offset
+     * @param limit
+     * @return
+     */
+    List<Comment> findUserComments(int userId, int offset, int limit);
 }

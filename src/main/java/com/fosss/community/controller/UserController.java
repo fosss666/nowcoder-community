@@ -3,24 +3,23 @@ package com.fosss.community.controller;
 import com.fosss.community.annotation.LoginRequired;
 import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.constant.LikeConstant;
+import com.fosss.community.entity.Comment;
 import com.fosss.community.entity.DiscussPost;
 import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
 import com.fosss.community.exception.BusinessException;
 import com.fosss.community.properties.ApplicationProperty;
-import com.fosss.community.service.DiscussPostService;
-import com.fosss.community.service.FollowService;
-import com.fosss.community.service.LikeService;
-import com.fosss.community.service.UserService;
+import com.fosss.community.service.*;
 import com.fosss.community.utils.CommunityUtil;
-import com.fosss.community.utils.RedisKeyUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -28,7 +27,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.fosss.community.constant.LikeConstant.ENTITY_TYPE_POST;
+import static com.fosss.community.constant.LikeConstant.ENTITY_TYPE_USER;
 
 /**
  * @author: fosss
@@ -60,6 +59,8 @@ public class UserController {
     private FollowService followService;
     @Resource
     private DiscussPostService discussPostService;
+    @Resource
+    private CommentService commentService;
 
     /**
      * 跳转账号设置页面
@@ -223,5 +224,35 @@ public class UserController {
         model.addAttribute("discussPosts", discussVOList);
 
         return "/site/my-post";
+    }
+
+    /**
+     * 我的回复
+     */
+    @GetMapping("/myreply/{userId}")
+    public String getMyreply(@PathVariable("userId") int userId, Page page, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) throw new BusinessException(ExceptionConstant.USER_NOT_FOUND);
+        model.addAttribute("user", user);
+
+        //设置分页信息
+        page.setPath("/user/myreply/" + userId);
+        page.setRows(commentService.findUserCount(userId));
+
+        //查询用户的回复
+        List<Comment> commentList = commentService.findUserComments(userId, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> commentVOList = new ArrayList<>();
+        if (commentList != null) {
+            for (Comment comment : commentList) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("comment", comment);
+                DiscussPost post = discussPostService.selectById(comment.getEntityId());
+                map.put("discussPost", post);
+                commentVOList.add(map);
+            }
+        }
+        model.addAttribute("comments", commentVOList);
+
+        return "/site/my-reply";
     }
 }

@@ -8,10 +8,12 @@ import com.fosss.community.service.MessageService;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -62,6 +64,14 @@ public class MessageController {
         return "/site/letter";
     }
 
+    /**
+     * 查询会话详情
+     *
+     * @param conversationId
+     * @param page
+     * @param model
+     * @return
+     */
     @GetMapping(path = "/letter/detail/{conversationId}")
     public String getLetterDetail(@PathVariable("conversationId") String conversationId, Page page, Model model) {
         // 分页信息

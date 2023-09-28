@@ -75,4 +75,22 @@ public class CommentServiceImpl implements CommentService {
             discussPostService.updateCommentCount(comment.getEntityId(), count);
         }
     }
+
+    @Override
+    public int findUserCount(int userId) {
+        return commentMapper.selectCountByUser(userId);
+    }
+
+    /**
+     * 查询用户的回复
+     *
+     * @param userId
+     * @param offset
+     * @param limit
+     * @return
+     */
+    @Override
+    public List<Comment> findUserComments(int userId, int offset, int limit) {
+        return commentMapper.selectCommentsByUser(userId, offset, limit);
+    }
 }
