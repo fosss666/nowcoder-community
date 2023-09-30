@@ -1,9 +1,6 @@
 package com.fosss.community.controller;
 
-import com.fosss.community.constant.ActivationStatusConstant;
-import com.fosss.community.constant.ExceptionConstant;
-import com.fosss.community.constant.ResultEnum;
-import com.fosss.community.constant.UserErrorEnum;
+import com.fosss.community.constant.*;
 import com.fosss.community.entity.User;
 import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.UserService;
@@ -128,12 +125,12 @@ public class LoginController {
         //为用户生成一个标识
         String kaptchaOwner = CommunityUtil.generateUUID();
         Cookie cookie = new Cookie("kaptchaOwner", kaptchaOwner);
-        cookie.setMaxAge(60);
+        cookie.setMaxAge(ExpiredConstant.REDIS_KAPTCHA_CODE);
         cookie.setPath(applicationProperty.getContextPath());
         response.addCookie(cookie);
         //将验证码存入redis
         String redisKey = RedisKeyUtil.generateKaptchaKey(kaptchaOwner);
-        redisTemplate.opsForValue().set(redisKey, text, 60, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(redisKey, text, ExpiredConstant.REDIS_KAPTCHA_CODE, TimeUnit.SECONDS);
 
         // 将突图片输出给浏览器
         response.setContentType("image/png");

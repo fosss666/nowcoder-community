@@ -1,9 +1,6 @@
 package com.fosss.community.service.impl;
 
-import com.fosss.community.constant.ActivationStatusConstant;
-import com.fosss.community.constant.LoginTicketStatusConstant;
-import com.fosss.community.constant.UserErrorEnum;
-import com.fosss.community.constant.UserStatusConstant;
+import com.fosss.community.constant.*;
 import com.fosss.community.dao.LoginTicketMapper;
 import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.LoginTicket;
@@ -12,8 +9,10 @@ import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
 import com.fosss.community.utils.MailUtil;
+import com.fosss.community.utils.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -23,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -34,10 +34,12 @@ public class UserServiceImpl implements UserService {
     private TemplateEngine templateEngine;
     @Resource
     private MailUtil mailUtil;
-    @Resource
-    private LoginTicketMapper loginTicketMapper;
+    //@Resource
+    //private LoginTicketMapper loginTicketMapper;
     @Resource
     private ApplicationProperty applicationProperty;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
 
     public User findUserById(int id) {
@@ -165,7 +167,9 @@ public class UserServiceImpl implements UserService {
         loginTicket.setStatus(LoginTicketStatusConstant.EFFECTIVE);
         //过期时间  expiredSeconds * 1000L：转成毫秒
         loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000L));
-        loginTicketMapper.insertLoginTicket(loginTicket);
+        //loginTicketMapper.insertLoginTicket(loginTicket);
+        String redisKey = RedisKeyUtil.generateTicketKey(loginTicket.getTicket());
+        redisTemplate.opsForValue().set(redisKey, loginTicket);
 
         map.put("ticket", loginTicket.getTicket());
         return map;
@@ -175,7 +179,11 @@ public class UserServiceImpl implements UserService {
      * 登出
      */
     public void logout(String ticket) {
-        loginTicketMapper.updateStatus(ticket, 1);
+        //loginTicketMapper.updateStatus(ticket, 1);
+        String redisKey = RedisKeyUtil.generateTicketKey(ticket);
+        LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(redisKey);
+        loginTicket.setStatus(LoginTicketStatusConstant.NOT_EFFECTIVE);
+        redisTemplate.opsForValue().set(redisKey, loginTicket);
     }
 
     /**
@@ -183,7 +191,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public LoginTicket getByTicket(String ticket) {
-        return loginTicketMapper.selectByTicket(ticket);
+        String redisKey = RedisKeyUtil.generateTicketKey(ticket);
+        return (LoginTicket) redisTemplate.opsForValue().get(redisKey);
     }
 
     /**

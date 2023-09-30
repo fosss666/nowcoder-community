@@ -14,6 +14,7 @@ public class RedisKeyUtil {
     private static final String PREFIX_FOLLOWEE = "followee";
     private static final String PREFIX_FOLLOWER = "follower";
     private static final String PREFIX_KAPTCHA = "kaptcha";
+    private static final String PREFIX_TICKET = "ticket";
 
     /**
      * 生成某个实体点赞的key
@@ -52,5 +53,12 @@ public class RedisKeyUtil {
      */
     public static String generateKaptchaKey(String owner) {
         return PREFIX_KAPTCHA + SPLIT + owner;
+    }
+
+    /**
+     * 生成登录凭证的key
+     */
+    public static String generateTicketKey(String ticket) {
+        return PREFIX_TICKET + SPLIT + ticket;
     }
 }

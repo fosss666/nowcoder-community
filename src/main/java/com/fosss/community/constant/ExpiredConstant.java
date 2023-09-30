@@ -7,6 +7,8 @@ package com.fosss.community.constant;
  * Description:
  */
 public class ExpiredConstant {
-    public static final int REMEMBER_EXPIRED_SECONDS=3600*24*100;//100天
-    public static final int DEFAULT_EXPIRED_SECONDS=3600*12;//12小时
+    public static final int REMEMBER_EXPIRED_SECONDS = 3600 * 24 * 100;//100天
+    public static final int DEFAULT_EXPIRED_SECONDS = 3600 * 12;//12小时
+    public static final int REDIS_KAPTCHA_CODE = 60;
+    public static final int REDIS_LOGIN_TICKET = 3600;
 }
