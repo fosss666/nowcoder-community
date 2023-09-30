@@ -43,7 +43,22 @@ public class UserServiceImpl implements UserService {
 
 
     public User findUserById(int id) {
-        return userMapper.selectById(id);
+        //优先从缓存中取值,缓存中没有的话再从数据库中查，并将结果存入缓存
+        String key = RedisKeyUtil.generateUserKey(id);
+        User user = (User) redisTemplate.opsForValue().get(key);
+        if (user == null) {
+            user = userMapper.selectById(id);
+            redisTemplate.opsForValue().set(key, user, ExpiredConstant.REDIS_LOGIN_TICKET, TimeUnit.SECONDS);
+        }
+        return user;
+    }
+
+    /**
+     * 用户数据变更时删除缓存
+     */
+    private void clearCache(int userId) {
+        String key = RedisKeyUtil.generateUserKey(userId);
+        redisTemplate.delete(key);
     }
 
     /**
@@ -118,6 +133,7 @@ public class UserServiceImpl implements UserService {
         } else if (user.getActivationCode().equals(code)) {
             //激活码正确,更新用户状态
             userMapper.updateStatus(userId, UserStatusConstant.ALREADY_ACTIVATED);
+            clearCache(userId);
             return ActivationStatusConstant.ACTIVATION_SUCCESS;
         } else {
             return ActivationStatusConstant.ACTIVATION_FAILURE;
@@ -204,6 +220,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void upload(int userId, String avatarPath) {
         userMapper.updateHeader(userId, avatarPath);
+        clearCache(userId);
     }
 
     /**
@@ -232,6 +249,7 @@ public class UserServiceImpl implements UserService {
         // 重置密码
         password = CommunityUtil.md5(password + user.getSalt());
         userMapper.updatePassword(user.getId(), password);
+        clearCache(user.getId());
 
         map.put("user", user);
         return map;
