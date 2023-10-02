@@ -19,6 +19,12 @@ spring:
     database: 1  #用那个库，默认16个，默认使用第1个
     host: 192.168.60.129
     port: 6379
+  kafka:
+    bootstrap-servers: 192.168.60.129:9092
+    consumer:
+      group-id: community-consumer-group
+      enable-auto-commit: true
+      auto-commit-interval: 200  # 设置自动提交offset
 #  mail: # 邮件 配置在yaml文件中
 #    host: smtp.163.com
 #    username: ggrxhskd@163.com

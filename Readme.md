@@ -168,3 +168,7 @@ Object obj = redisTemplate.execute(new SessionCallback() {
             }
         });
 ```
+
+### kafka
+
+* 用docker部署
