@@ -16,4 +16,7 @@ public class ExceptionConstant {
     public static final String FILE_READ_ERROR = "读取文件失败！";
     public static final String SERVER_EXCEPTION = "服务器异常！";
     public static final String USER_NOT_FOUND = "用户不存在！";
+
+    public static final String EVENT_CONTENT_NULL = "事件内容不能为空！";
+    public static final String EVENT_FORMAT_ERROR = "事件格式错误！";
 }

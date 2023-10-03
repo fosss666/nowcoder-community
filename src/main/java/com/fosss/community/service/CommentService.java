@@ -46,4 +46,6 @@ public interface CommentService {
      * @return
      */
     List<Comment> findUserComments(int userId, int offset, int limit);
+
+    Comment selectById(int id);
 }

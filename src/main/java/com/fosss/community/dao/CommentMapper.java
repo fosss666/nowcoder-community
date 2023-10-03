@@ -3,6 +3,7 @@ package com.fosss.community.dao;
 import com.fosss.community.entity.Comment;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -52,4 +53,7 @@ public interface CommentMapper {
      * @return
      */
     List<Comment> selectCommentsByUser(int userId, int offset, int limit);
+
+    @Select("select id, user_id, entity_type, entity_id, target_id, content, status, create_time from comment where id = #{id}")
+    Comment selectById(int id);
 }

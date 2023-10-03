@@ -1,5 +1,6 @@
 package com.fosss.community.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,22 +15,19 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class SensitiveFilter {
-
-    private static final Logger logger = LoggerFactory.getLogger(SensitiveFilter.class);
 
     // 替换符
     private static final String REPLACEMENT = "***";
 
-    // 根节点，不储存字符
+    // 根节点
     private TrieNode rootNode = new TrieNode();
 
-    //被@PostConstruct修饰的方法会在服务器加载Servlet的时候运行，并且只会被服务器调用一次，类似于Servlet的init()方法。被@PostConstruct修饰的方法会在构造函数之后，init()方法之前运行。
     @PostConstruct
     public void init() {
         try (
-                //读取敏感词文件中的敏感词，一行为一个敏感词
                 InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         ) {
@@ -39,7 +37,7 @@ public class SensitiveFilter {
                 this.addKeyword(keyword);
             }
         } catch (IOException e) {
-            logger.error("加载敏感词文件失败: " + e.getMessage());
+            log.error("加载敏感词文件失败: " + e.getMessage());
         }
     }
 
@@ -48,10 +46,8 @@ public class SensitiveFilter {
         TrieNode tempNode = rootNode;
         for (int i = 0; i < keyword.length(); i++) {
             char c = keyword.charAt(i);
-            //以字符c为key，查看是否有子节点
             TrieNode subNode = tempNode.getSubNode(c);
 
-            //没有子节点，则创建；有子节点，则无需创建，直接去子节点寻找下个字符
             if (subNode == null) {
                 // 初始化子节点
                 subNode = new TrieNode();
@@ -88,7 +84,7 @@ public class SensitiveFilter {
         // 结果
         StringBuilder sb = new StringBuilder();
 
-        while (begin < text.length()) {
+        while (position < text.length()) {
             char c = text.charAt(position);
 
             // 跳过符号
@@ -106,7 +102,7 @@ public class SensitiveFilter {
             // 检查下级节点
             tempNode = tempNode.getSubNode(c);
             if (tempNode == null) {
-                // begin处的字符不是敏感词
+                // 以begin开头的字符串不是敏感词
                 sb.append(text.charAt(begin));
                 // 进入下一个位置
                 position = ++begin;
@@ -121,14 +117,17 @@ public class SensitiveFilter {
                 tempNode = rootNode;
             } else {
                 // 检查下一个字符
-                if (position < text.length() - 1) position++;
+                position++;
             }
         }
+
+        // 将最后一批字符计入结果
+        sb.append(text.substring(begin));
 
         return sb.toString();
     }
 
-    // 判断字符是否为特殊符号
+    // 判断是否为符号
     private boolean isSymbol(Character c) {
         // 0x2E80~0x9FFF 是东亚文字范围
         return !CharUtils.isAsciiAlphanumeric(c) && (c < 0x2E80 || c > 0x9FFF);
@@ -137,7 +136,7 @@ public class SensitiveFilter {
     // 前缀树
     private class TrieNode {
 
-        // 关键词结束标识，是否找到了敏感词
+        // 关键词结束标识
         private boolean isKeywordEnd = false;
 
         // 子节点(key是下级字符,value是下级节点)
@@ -160,7 +159,6 @@ public class SensitiveFilter {
         public TrieNode getSubNode(Character c) {
             return subNodes.get(c);
         }
-
     }
 
 }

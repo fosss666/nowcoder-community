@@ -1,11 +1,14 @@
 package com.fosss.community.controller;
 
 import com.fosss.community.annotation.LoginRequired;
+import com.fosss.community.constant.EventConstant;
 import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.constant.ResultEnum;
+import com.fosss.community.entity.Event;
 import com.fosss.community.entity.Page;
 import com.fosss.community.entity.User;
+import com.fosss.community.event.EventProducer;
 import com.fosss.community.exception.BusinessException;
 import com.fosss.community.service.FollowService;
 import com.fosss.community.service.UserService;
@@ -37,6 +40,8 @@ public class FollowController {
     private ThreadLocalUtil threadLocalUtil;
     @Resource
     private UserService userService;
+    @Resource
+    private EventProducer eventProducer;
 
     /**
      * 关注
@@ -47,6 +52,15 @@ public class FollowController {
     @LoginRequired
     public String follow(int entityType, int entityId) {
         followService.follow(threadLocalUtil.get().getId(), entityType, entityId);
+
+        //触发关注事件
+        Event event = new Event()
+                .setTopic(EventConstant.EVENT_TOPIC_FOLLOW)
+                .setUserId(threadLocalUtil.get().getId())
+                .setEntityId(entityId)
+                .setEntityType(entityType)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
 
         return CommunityUtil.getJSONString(ResultEnum.FOLLOW_SUCCESS.code, ResultEnum.FOLLOW_SUCCESS.msg);
     }

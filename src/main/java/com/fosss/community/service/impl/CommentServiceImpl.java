@@ -93,4 +93,9 @@ public class CommentServiceImpl implements CommentService {
     public List<Comment> findUserComments(int userId, int offset, int limit) {
         return commentMapper.selectCommentsByUser(userId, offset, limit);
     }
+
+    @Override
+    public Comment selectById(int id) {
+        return commentMapper.selectById(id);
+    }
 }

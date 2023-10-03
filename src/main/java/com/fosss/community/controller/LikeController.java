@@ -1,8 +1,12 @@
 package com.fosss.community.controller;
 
 import com.fosss.community.annotation.LoginRequired;
+import com.fosss.community.constant.EventConstant;
+import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.constant.ResultEnum;
+import com.fosss.community.entity.Event;
 import com.fosss.community.entity.User;
+import com.fosss.community.event.EventProducer;
 import com.fosss.community.service.LikeService;
 import com.fosss.community.utils.CommunityUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
@@ -29,6 +33,8 @@ public class LikeController {
     private ThreadLocalUtil threadLocalUtil;
     @Resource
     private LikeService likeService;
+    @Resource
+    private EventProducer eventProducer;
 
     /**
      * 点赞
@@ -41,7 +47,7 @@ public class LikeController {
     @PostMapping(path = "/like")
     @ResponseBody
     @LoginRequired
-    public String like(int entityType, int entityId, int entityUserId) {
+    public String like(int entityType, int entityId, int entityUserId, int postId) {
         User user = threadLocalUtil.get();
 
         // 点赞
@@ -55,6 +61,18 @@ public class LikeController {
         Map<String, Object> map = new HashMap<>();
         map.put("likeCount", likeCount);
         map.put("likeStatus", likeStatus);
+
+        //如果是点赞，触发点赞事件
+        if (likeStatus == LikeConstant.LIKED) {
+            Event event = new Event()
+                    .setTopic(EventConstant.EVENT_TOPIC_LIKE)
+                    .setUserId(threadLocalUtil.get().getId())
+                    .setEntityId(entityId)
+                    .setEntityType(entityType)
+                    .setEntityUserId(entityUserId)
+                    .setData(EventConstant.EVENT_CONTENT_POST_ID, postId);
+            eventProducer.fireEvent(event);
+        }
 
         return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg, map);
     }
