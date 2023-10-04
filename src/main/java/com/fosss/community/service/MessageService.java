@@ -41,4 +41,40 @@ public interface MessageService {
      * @param id
      */
     void deleteMessage(int id);
+
+    /**
+     * 查询最新通知
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    Message findLatestNotice(int userId, String topic);
+
+    /**
+     * 查询通知数量
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    int findNoticeCount(int userId, String topic);
+
+    /**
+     * 查询未读通知数量
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    int findNoticeUnreadCount(int userId, String topic);
+
+    /**
+     * 分页查询通知列表
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    List<Message> findNotices(int userId, String topic, int offset, int limit);
 }

@@ -72,7 +72,56 @@ public class MessageServiceImpl implements MessageService {
     /**
      * 删除私信
      */
+    @Override
     public void deleteMessage(int id) {
         messageMapper.updateMessageStatus(Collections.singletonList(id), MessageConstant.DELETED);
+    }
+
+    /**
+     * 查询最新通知
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    @Override
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    /**
+     * 查询通知数量
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    @Override
+    public int findNoticeCount(int userId, String topic) {
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+    /**
+     * 查询未读通知数量
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    @Override
+    public int findNoticeUnreadCount(int userId, String topic) {
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    /**
+     * 分页查询通知列表
+     *
+     * @param userId 用户id
+     * @param topic  主题
+     * @return 消息
+     */
+    @Override
+    public List<Message> findNotices(int userId, String topic, int offset, int limit) {
+        return messageMapper.selectNotices(userId, topic, offset, limit);
     }
 }
