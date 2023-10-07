@@ -57,6 +57,7 @@ public class CommentController {
                 .setEntityId(comment.getEntityId())
                 .setEntityType(comment.getEntityType())
                 .setData(EventConstant.EVENT_CONTENT_POST_ID, discussPostId);
+        //触发评论事件
         //判断评论的是帖子还是回复
         if (comment.getEntityType() == ENTITY_TYPE_POST) {
             //查询帖子的作者
@@ -66,6 +67,14 @@ public class CommentController {
             Comment target = commentService.selectById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         }
+        eventProducer.fireEvent(event);
+
+        //触发es发布帖子事件
+        event = new Event()
+                .setTopic(EventConstant.EVENT_TOPIC_PUBLISH)
+                .setUserId(comment.getUserId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(discussPostId);
         eventProducer.fireEvent(event);
 
         return "redirect:/discuss/detail/" + discussPostId;

@@ -13,6 +13,8 @@ public class EventConstant {
     public static final String EVENT_TOPIC_LIKE = "like";
     //关注
     public static final String EVENT_TOPIC_FOLLOW = "follow";
+    //帖子发布
+    public static final String EVENT_TOPIC_PUBLISH = "publish";
 
     public static final int SYSTEM_USER_ID = 1;
 

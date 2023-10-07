@@ -3,8 +3,11 @@ package com.fosss.community.event;
 import com.alibaba.fastjson2.JSON;
 import com.fosss.community.constant.EventConstant;
 import com.fosss.community.constant.ExceptionConstant;
+import com.fosss.community.entity.DiscussPost;
 import com.fosss.community.entity.Event;
 import com.fosss.community.entity.Message;
+import com.fosss.community.service.DiscussPostService;
+import com.fosss.community.service.ElasticsearchService;
 import com.fosss.community.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -28,6 +31,10 @@ public class EventConsumer {
 
     @Resource
     private MessageService messageService;
+    @Resource
+    private DiscussPostService discussPostService;
+    @Resource
+    private ElasticsearchService elasticsearchService;
 
     /**
      * 消费事件
@@ -62,5 +69,25 @@ public class EventConsumer {
         }
         message.setContent(JSON.toJSONString(content));
         messageService.addMessage(message);
+    }
+
+    /**
+     * 消费帖子发布事件
+     */
+    @KafkaListener(topics = EventConstant.EVENT_TOPIC_PUBLISH)
+    public void handlePublicEvent(ConsumerRecord record) {
+        if (record == null || record.value() == null) {
+            log.error(ExceptionConstant.EVENT_CONTENT_NULL);
+            return;
+        }
+        Event event = JSON.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            log.error(ExceptionConstant.EVENT_FORMAT_ERROR);
+            return;
+        }
+        //查询帖子
+        DiscussPost discussPost = discussPostService.selectById(event.getEntityId());
+        //保存到es
+        elasticsearchService.saveDiscussPost(discussPost);
     }
 }

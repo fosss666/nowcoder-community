@@ -25,7 +25,7 @@
         </if>
     </select>
 
-    <insert id="insertDiscussPost">
+    <insert id="insertDiscussPost" keyProperty="id" useGeneratedKeys="true">
         insert into discuss_post(user_id, title, content, type, status, create_time, comment_count, score)
         VALUES (#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
     </insert>

@@ -4,6 +4,7 @@ package com.fosss.community;
 import com.fosss.community.dao.DiscussPostMapper;
 import com.fosss.community.dao.DiscussPostRepository;
 import com.fosss.community.entity.DiscussPost;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -28,6 +29,7 @@ public class ElasticsearchTests {
     private DiscussPostRepository discussRepository;
     @Resource
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
+
 
     @Test
     public void testInsert() {
@@ -79,11 +81,12 @@ public class ElasticsearchTests {
 
     @Test
     public void testSearchByTemplate() {
+
         NativeSearchQuery query = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.multiMatchQuery("互联网寒冬", "title", "content"))
                 .withSort(SortBuilders.fieldSort("type").order(SortOrder.DESC))
                 .withSort(SortBuilders.fieldSort("score").order(SortOrder.DESC))
-                .withSort(SortBuilders.fieldSort("score").order(SortOrder.DESC))
+                .withSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC))
                 .withPageable(PageRequest.of(0, 10))
                 .withHighlightFields(
                         new HighlightBuilder.Field("title").preTags("<em>").postTags("</em>"),

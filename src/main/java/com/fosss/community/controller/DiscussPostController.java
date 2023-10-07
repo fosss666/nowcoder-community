@@ -1,12 +1,11 @@
 package com.fosss.community.controller;
 
 import com.fosss.community.annotation.LoginRequired;
+import com.fosss.community.constant.EventConstant;
 import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.constant.ResultEnum;
-import com.fosss.community.entity.Comment;
-import com.fosss.community.entity.DiscussPost;
-import com.fosss.community.entity.Page;
-import com.fosss.community.entity.User;
+import com.fosss.community.entity.*;
+import com.fosss.community.event.EventProducer;
 import com.fosss.community.service.CommentService;
 import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.service.LikeService;
@@ -44,6 +43,8 @@ public class DiscussPostController {
     private CommentService commentService;
     @Resource
     private LikeService likeService;
+    @Resource
+    private EventProducer eventProducer;
 
     /**
      * 发布帖子
@@ -59,6 +60,14 @@ public class DiscussPostController {
         discussPost.setUserId(user.getId());
         discussPost.setCreateTime(new Date());
         discussPostService.insertDiscussPost(discussPost);
+
+        //触发es事件
+        Event event = new Event()
+                .setTopic(EventConstant.EVENT_TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(discussPost.getId());
+        eventProducer.fireEvent(event);
 
         return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg);
     }
