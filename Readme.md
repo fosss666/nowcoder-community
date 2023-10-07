@@ -172,3 +172,19 @@ Object obj = redisTemplate.execute(new SessionCallback() {
 ### kafka
 
 * 用docker部署
+
+### es
+
+* 解决netty启动冲突
+
+  ```java
+  # 在启动类中加入
+  @PostConstruct
+  public void init() {
+  // 解决netty启动冲突问题
+  // Netty4Utils.setAvailableProcessors()
+  System.setProperty("es.set.netty.runtime.available.processors", "false");
+  }
+  ```
+
+  
