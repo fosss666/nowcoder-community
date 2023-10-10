@@ -32,8 +32,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns("/static/**");
-        registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/static/**");
+        //用 spring security 代替拦截器实现登录检查
+        //registry.addInterceptor(loginRequiredInterceptor)
+        //        .excludePathPatterns("/static/**");
         registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/static/**");
     }

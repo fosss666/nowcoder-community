@@ -1,7 +1,6 @@
 package com.fosss.community.service.impl;
 
 import com.fosss.community.constant.*;
-import com.fosss.community.dao.LoginTicketMapper;
 import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.LoginTicket;
 import com.fosss.community.entity.User;
@@ -13,15 +12,14 @@ import com.fosss.community.utils.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -200,6 +198,9 @@ public class UserServiceImpl implements UserService {
         LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(redisKey);
         loginTicket.setStatus(LoginTicketStatusConstant.NOT_EFFECTIVE);
         redisTemplate.opsForValue().set(redisKey, loginTicket);
+
+        //清理security的用户信息
+        SecurityContextHolder.clearContext();
     }
 
     /**
@@ -302,5 +303,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserByEmail(String email) {
         return userMapper.selectByEmail(email);
+    }
+
+    /**
+     * 获取用户权限
+     */
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthority(int userId) {
+        User user = findUserById(userId);
+        List<GrantedAuthority> list = new ArrayList<>();
+        list.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                switch (user.getType()) {
+                    case UserTypeConstant.ADMIN_USER:
+                        return UserTypeConstant.ADMIN_USER_TYPE;
+                    case UserTypeConstant.MASTER_USER:
+                        return UserTypeConstant.MASTER_USER_Type;
+                    default:
+                        return UserTypeConstant.COMMON_USER_TYPE;
+                }
+            }
+        });
+        return list;
     }
 }

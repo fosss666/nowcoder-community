@@ -7,6 +7,10 @@ import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CookieUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -48,6 +52,12 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 User user = userService.findUserById(loginTicket.getUserId());
                 //放入ThreadLocal中，保存用户信息
                 threadLocalUtil.set(user);
+
+                //向security中存储用户授权token
+                Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
+                        user, ticket, userService.getAuthority(user.getId())
+                );
+                SecurityContextHolder.setContext(new SecurityContextImpl(authenticationToken));
             }
         }
         return true;

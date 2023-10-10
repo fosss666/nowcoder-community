@@ -14,6 +14,7 @@ public enum ResultEnum {
     USER_NOT_FOUND(1, "用户名不存在!"),
 
     PERMISSION_ERROR(403, "您还没有登录哦！"),
+    PERMISSION_DISABLE(403, "权限不足！"),
 
     EMAIL_NULL(2, "邮箱不能为空！"),
 

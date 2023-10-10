@@ -2,7 +2,9 @@ package com.fosss.community.service;
 
 import com.fosss.community.entity.LoginTicket;
 import com.fosss.community.entity.User;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -79,4 +81,9 @@ public interface UserService {
      * @return
      */
     User findUserByEmail(String email);
+
+    /**
+     * 获取用户权限
+     */
+    Collection<? extends GrantedAuthority> getAuthority(int userId);
 }
