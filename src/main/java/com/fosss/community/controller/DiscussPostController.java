@@ -1,6 +1,7 @@
 package com.fosss.community.controller;
 
 import com.fosss.community.annotation.LoginRequired;
+import com.fosss.community.constant.DiscussPostConstant;
 import com.fosss.community.constant.EventConstant;
 import com.fosss.community.constant.LikeConstant;
 import com.fosss.community.constant.ResultEnum;
@@ -153,5 +154,77 @@ public class DiscussPostController {
 
         //跳转到详情页面
         return "/site/discuss-detail";
+    }
+
+    /**
+     * 置顶、取消置顶
+     */
+
+    @PostMapping(path = "/top")
+    @ResponseBody
+    public String setTop(int id) {
+        DiscussPost discussPostById = discussPostService.selectById(id);
+        // 获取置顶状态，1为置顶，0为正常状态,1^1=0 0^1=1
+        int type = discussPostById.getType() == DiscussPostConstant.TOP ? DiscussPostConstant.UN_TOP : DiscussPostConstant.TOP;
+        //更新帖子类型
+        discussPostService.updateType(id, type);
+        // 返回的结果
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", type);
+
+        // 触发发帖事件(更改帖子类型)
+        Event event = new Event()
+                .setTopic(EventConstant.EVENT_TOPIC_PUBLISH)
+                .setUserId(threadLocalUtil.get().getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+
+        return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg, map);
+    }
+
+    /**
+     * 加精、取消加精
+     */
+    @PostMapping(path = "/wonderful")
+    @ResponseBody
+    public String setWonderful(int id) {
+        DiscussPost discussPostById = discussPostService.selectById(id);
+        int status = discussPostById.getStatus() == DiscussPostConstant.WONDERFUL ? DiscussPostConstant.UN_WONDERFUL :
+                DiscussPostConstant.WONDERFUL;
+        // 1为加精，0为正常， 1^1=0, 0^1=1
+        discussPostService.updateStatus(id, status);
+        // 返回的结果
+        Map<String, Object> map = new HashMap<>();
+        map.put("status", status);
+
+        // 触发发帖事件(更改帖子状态)
+        Event event = new Event()
+                .setTopic(EventConstant.EVENT_TOPIC_PUBLISH)
+                .setUserId(threadLocalUtil.get().getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+
+        return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg, map);
+    }
+
+    /**
+     * 删除帖子
+     */
+    @PostMapping(path = "/delete")
+    @ResponseBody
+    public String setDelete(int id) {
+        discussPostService.updateStatus(id, DiscussPostConstant.DELETED);
+
+        // 触发删帖事件
+        Event event = new Event()
+                .setTopic(EventConstant.EVENT_TOPIC_DELETE)
+                .setUserId(threadLocalUtil.get().getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+
+        return CommunityUtil.getJSONString(0);
     }
 }

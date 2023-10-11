@@ -32,4 +32,14 @@ public interface DiscussPostService {
      * @param count
      */
     void updateCommentCount(int entityId, int count);
+
+    /**
+     * 更新帖子类型
+     */
+    void updateType(int id, int type);
+
+    /**
+     * 更新帖子状态
+     */
+    void updateStatus(int id, int status);
 }

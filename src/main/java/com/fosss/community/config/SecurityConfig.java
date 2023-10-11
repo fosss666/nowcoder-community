@@ -1,5 +1,6 @@
 package com.fosss.community.config;
 
+import com.fosss.community.constant.ActivationStatusConstant;
 import com.fosss.community.constant.ResultEnum;
 import com.fosss.community.constant.UserTypeConstant;
 import com.fosss.community.utils.CommunityUtil;
@@ -48,6 +49,18 @@ public class SecurityConfig {
                         UserTypeConstant.COMMON_USER_TYPE,
                         UserTypeConstant.ADMIN_USER_TYPE,
                         UserTypeConstant.MASTER_USER_Type
+                )
+                .antMatchers(
+                        "/discuss/top",
+                        "/discuss/wonderful"
+                ).hasAnyAuthority(
+                        UserTypeConstant.MASTER_USER_Type
+                )
+                .antMatchers(
+                        "/discuss/delete"
+                )
+                .hasAnyAuthority(
+                        UserTypeConstant.ADMIN_USER_TYPE
                 )
                 .anyRequest().permitAll()
                 .and().csrf().disable();

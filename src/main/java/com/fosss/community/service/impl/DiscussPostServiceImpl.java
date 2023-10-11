@@ -64,4 +64,20 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     public void updateCommentCount(int entityId, int count) {
         discussPostMapper.updateCommentCount(entityId, count);
     }
+
+    /**
+     * 更新帖子类型
+     */
+    @Override
+    public void updateType(int id, int type) {
+        discussPostMapper.updateType(id, type);
+    }
+
+    /**
+     * 更新帖子状态
+     */
+    @Override
+    public void updateStatus(int id, int status) {
+        discussPostMapper.updateStatus(id, status);
+    }
 }

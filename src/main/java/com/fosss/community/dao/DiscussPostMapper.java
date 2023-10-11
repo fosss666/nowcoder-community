@@ -37,4 +37,16 @@ public interface DiscussPostMapper {
      */
     @Update("update discuss_post set comment_count =#{count} where id=#{entityId}")
     void updateCommentCount(@Param("entityId") int entityId, @Param("count") int count);
+
+    /**
+     * 更新帖子状态
+     */
+    @Update("update discuss_post set type=#{type} where id=#{id}")
+    void updateType(int id, int type);
+
+    /**
+     * 更新帖子状态
+     */
+    @Update("update discuss_post set status=#{status} where id=#{id}")
+    void updateStatus(int id, int status);
 }
