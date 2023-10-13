@@ -57,7 +57,8 @@ public class SecurityConfig {
                         UserTypeConstant.MASTER_USER_Type
                 )
                 .antMatchers(
-                        "/discuss/delete"
+                        "/discuss/delete",
+                        "/data/**"
                 )
                 .hasAnyAuthority(
                         UserTypeConstant.ADMIN_USER_TYPE

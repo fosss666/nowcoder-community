@@ -1,5 +1,6 @@
 package com.fosss.community.config;
 
+import com.fosss.community.interceptor.DataInterceptor;
 import com.fosss.community.interceptor.LoginRequiredInterceptor;
 import com.fosss.community.interceptor.LoginTicketInterceptor;
 import com.fosss.community.interceptor.MessageInterceptor;
@@ -24,6 +25,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private LoginRequiredInterceptor loginRequiredInterceptor;
     @Resource
     private MessageInterceptor messageInterceptor;
+    @Resource
+    private DataInterceptor dataInterceptor;
 
     /**
      * 添加拦截器，配置拦截路径，放行静态资源
@@ -36,6 +39,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         //registry.addInterceptor(loginRequiredInterceptor)
         //        .excludePathPatterns("/static/**");
         registry.addInterceptor(messageInterceptor)
+                .excludePathPatterns("/static/**");
+        registry.addInterceptor(dataInterceptor)
                 .excludePathPatterns("/static/**");
     }
 }
