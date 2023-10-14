@@ -25,8 +25,17 @@ spring:
       group-id: community-consumer-group
       enable-auto-commit: true
       auto-commit-interval: 200  # 设置自动提交offset
-  elasticsearch:  # Elasticsearch
+  elasticsearch: # Elasticsearch
     uris: 192.168.60.129:9200
+  task:
+    execution: # spring普通线程池配置
+      pool:
+        core-size: 5 # 主要使用数
+        max-size: 10 # 最大扩容使用数
+        queue-capacity: 100 # 队列容量，超过max-size时，将任务放到队列中，队列的容量
+    scheduling: # spring 能使用定时任务的线程池
+      pool:
+        size: 5
 #  mail: # 邮件 配置在yaml文件中
 #    host: smtp.163.com
 #    username: ggrxhskd@163.com

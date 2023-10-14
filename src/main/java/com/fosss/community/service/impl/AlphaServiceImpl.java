@@ -5,6 +5,10 @@ import com.fosss.community.dao.UserMapper;
 import com.fosss.community.entity.DiscussPost;
 import com.fosss.community.entity.User;
 import com.fosss.community.utils.CommunityUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
@@ -22,6 +26,8 @@ import java.util.Date;
  * Time: 13:30
  * Description:
  */
+@Service
+@Slf4j
 public class AlphaServiceImpl {
 
     @Resource
@@ -89,5 +95,18 @@ public class AlphaServiceImpl {
                 return "ok";
             }
         });
+    }
+
+    /**
+     * 测试注解方式实现spring普通多线程和定时任务
+     */
+    @Async
+    public void test1() {
+        log.debug("test annotation @Async");
+    }
+
+    @Scheduled(initialDelay = 5000, fixedRate = 2000)
+    public void test2() {
+        log.debug("test annotation @Scheduled");
     }
 }
