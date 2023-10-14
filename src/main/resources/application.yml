@@ -36,6 +36,27 @@ spring:
     scheduling: # spring 能使用定时任务的线程池
       pool:
         size: 5
+  # quartz配置
+  quartz:
+    job-store-type: jdbc
+    scheduler-name: communityScheduler
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            isClustered: true
+            clusterCheckinInterval: 10000
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+    jdbc:
+      initialize-schema: never
 #  mail: # 邮件 配置在yaml文件中
 #    host: smtp.163.com
 #    username: ggrxhskd@163.com
