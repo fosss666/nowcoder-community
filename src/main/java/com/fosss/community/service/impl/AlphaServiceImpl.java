@@ -105,7 +105,7 @@ public class AlphaServiceImpl {
         log.debug("test annotation @Async");
     }
 
-    @Scheduled(initialDelay = 5000, fixedRate = 2000)
+    //@Scheduled(initialDelay = 5000, fixedRate = 2000)
     public void test2() {
         log.debug("test annotation @Scheduled");
     }

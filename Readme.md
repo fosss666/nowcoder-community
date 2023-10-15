@@ -187,4 +187,7 @@ Object obj = redisTemplate.execute(new SessionCallback() {
   }
   ```
 
-  
+
+### 热帖排行
+
+添加帖子、加精、添加评论、点赞，这几个操作会触发分数重新计算操作，如果发生以上行为，则将帖子id存入redis中的set，标记需要进行分数刷新操作，然后用quartz定时任务进行刷新

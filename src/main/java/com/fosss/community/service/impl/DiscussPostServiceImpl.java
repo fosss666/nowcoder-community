@@ -21,8 +21,8 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Resource
     private SensitiveFilter sensitiveFilter;
 
-    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit) {
-        return discussPostMapper.selectDiscussPosts(userId, offset, limit);
+    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit, int orderMode) {
+        return discussPostMapper.selectDiscussPosts(userId, offset, limit, orderMode);
     }
 
     public int findDiscussPostRows(int userId) {
@@ -79,5 +79,16 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Override
     public void updateStatus(int id, int status) {
         discussPostMapper.updateStatus(id, status);
+    }
+
+    /**
+     * 更新帖子分数
+     *
+     * @param postId
+     * @param score
+     */
+    @Override
+    public void updateScore(int postId, double score) {
+        discussPostMapper.updateScore(postId, score);
     }
 }

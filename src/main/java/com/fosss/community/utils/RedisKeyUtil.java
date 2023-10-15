@@ -20,6 +20,8 @@ public class RedisKeyUtil {
     public static final String PREFIX_UV = "uv";
     //每日活跃用户（按用户去重统计）
     public static final String PREFIX_DAU = "dau";
+    //标记需要进行分数刷新的帖子id的key
+    public static final String POST_SCORE = "post:score";
 
 
     /**
@@ -101,5 +103,12 @@ public class RedisKeyUtil {
      */
     public static String generateDAUKey(String startDate, String endDate) {
         return PREFIX_UV + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    /**
+     * 记录需要进行分数刷新的帖子id的key
+     */
+    public static String generatePostScoreRefreshKey() {
+        return POST_SCORE;
     }
 }

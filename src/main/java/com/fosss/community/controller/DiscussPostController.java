@@ -12,7 +12,9 @@ import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.service.LikeService;
 import com.fosss.community.service.UserService;
 import com.fosss.community.utils.CommunityUtil;
+import com.fosss.community.utils.RedisKeyUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,8 @@ public class DiscussPostController {
     private LikeService likeService;
     @Resource
     private EventProducer eventProducer;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 发布帖子
@@ -69,6 +73,10 @@ public class DiscussPostController {
                 .setEntityType(ENTITY_TYPE_POST)
                 .setEntityId(discussPost.getId());
         eventProducer.fireEvent(event);
+
+        //记录一下需要进行分数刷新
+        String key = RedisKeyUtil.generatePostScoreRefreshKey();
+        redisTemplate.opsForSet().add(key, discussPost.getId());
 
         return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg);
     }
@@ -192,8 +200,16 @@ public class DiscussPostController {
         DiscussPost discussPostById = discussPostService.selectById(id);
         int status = discussPostById.getStatus() == DiscussPostConstant.WONDERFUL ? DiscussPostConstant.UN_WONDERFUL :
                 DiscussPostConstant.WONDERFUL;
-        // 1为加精，0为正常， 1^1=0, 0^1=1
+
+        // 1为加精，0为正常
         discussPostService.updateStatus(id, status);
+        //此时的status为更新后帖子的状态
+        if (status == DiscussPostConstant.WONDERFUL) {
+            //记录一下需要进行分数刷新
+            String key = RedisKeyUtil.generatePostScoreRefreshKey();
+            redisTemplate.opsForSet().add(key, id);
+        }
+
         // 返回的结果
         Map<String, Object> map = new HashMap<>();
         map.put("status", status);

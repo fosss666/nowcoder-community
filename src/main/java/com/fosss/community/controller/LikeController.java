@@ -9,7 +9,9 @@ import com.fosss.community.entity.User;
 import com.fosss.community.event.EventProducer;
 import com.fosss.community.service.LikeService;
 import com.fosss.community.utils.CommunityUtil;
+import com.fosss.community.utils.RedisKeyUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +37,8 @@ public class LikeController {
     private LikeService likeService;
     @Resource
     private EventProducer eventProducer;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 点赞
@@ -72,6 +76,10 @@ public class LikeController {
                     .setEntityUserId(entityUserId)
                     .setData(EventConstant.EVENT_CONTENT_POST_ID, postId);
             eventProducer.fireEvent(event);
+
+            //记录一下需要进行分数刷新
+            String key = RedisKeyUtil.generatePostScoreRefreshKey();
+            redisTemplate.opsForSet().add(key, entityId);
         }
 
         return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg, map);

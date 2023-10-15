@@ -9,8 +9,10 @@ import com.fosss.community.entity.Event;
 import com.fosss.community.event.EventProducer;
 import com.fosss.community.service.CommentService;
 import com.fosss.community.service.DiscussPostService;
+import com.fosss.community.utils.RedisKeyUtil;
 import com.fosss.community.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,8 @@ public class CommentController {
     private DiscussPostService discussPostService;
     @Resource
     private EventProducer eventProducer;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 添加评论
@@ -76,6 +80,10 @@ public class CommentController {
                 .setEntityType(ENTITY_TYPE_POST)
                 .setEntityId(discussPostId);
         eventProducer.fireEvent(event);
+
+        //记录一下需要进行分数刷新
+        String key = RedisKeyUtil.generatePostScoreRefreshKey();
+        redisTemplate.opsForSet().add(key, discussPostId);
 
         return "redirect:/discuss/detail/" + discussPostId;
     }

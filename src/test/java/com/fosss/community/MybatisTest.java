@@ -49,7 +49,7 @@ public class MybatisTest {
 
     @Test
     void test1() {
-        List<DiscussPost> discussPosts = discussPostMapper.selectDiscussPosts(0, 0, 10);
+        List<DiscussPost> discussPosts = discussPostMapper.selectDiscussPosts(0, 0, 10, 0);
         System.out.println(discussPosts);
     }
 

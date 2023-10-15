@@ -1,6 +1,7 @@
 package com.fosss.community.config;
 
 import com.fosss.community.quartz.AlphaJob;
+import com.fosss.community.quartz.DiscussPostScoreRefreshJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,7 @@ public class QuartzConfig {
     // 4.该Bean得到的是FactoryBean所管理的对象实例.
 
     // 配置JobDetail
-    @Bean
+    //@Bean
     public JobDetailFactoryBean alphaJobDetail() {
         JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
         factoryBean.setJobClass(AlphaJob.class);
@@ -37,13 +38,38 @@ public class QuartzConfig {
     }
 
     // 配置Trigger(SimpleTriggerFactoryBean, CronTriggerFactoryBean)
-    @Bean
+    //@Bean
     public SimpleTriggerFactoryBean alphaTrigger(JobDetail alphaJobDetail) {
         SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
         factoryBean.setJobDetail(alphaJobDetail);
         factoryBean.setName("alphaTrigger");
         factoryBean.setGroup("alphaTriggerGroup");
         factoryBean.setRepeatInterval(3000);
+        factoryBean.setJobDataMap(new JobDataMap());
+        return factoryBean;
+    }
+
+    //配置帖子分数刷新任务
+    // 配置JobDetail
+    @Bean
+    public JobDetailFactoryBean postScoreRefreshJobDetail() {
+        JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
+        factoryBean.setJobClass(DiscussPostScoreRefreshJob.class);
+        factoryBean.setName("postScoreRefreshJob");
+        factoryBean.setGroup("communityJobGroup");
+        factoryBean.setDurability(true);//是否持久化
+        factoryBean.setRequestsRecovery(true);//是否可恢复
+        return factoryBean;
+    }
+
+    // 配置Trigger(SimpleTriggerFactoryBean, CronTriggerFactoryBean)
+    @Bean
+    public SimpleTriggerFactoryBean postScoreRefreshTrigger(JobDetail postScoreRefreshDetail) {
+        SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
+        factoryBean.setJobDetail(postScoreRefreshDetail);
+        factoryBean.setName("postScoreRefreshTrigger");
+        factoryBean.setGroup("communityTriggerGroup");
+        factoryBean.setRepeatInterval(1000 * 60 * 5);
         factoryBean.setJobDataMap(new JobDataMap());
         return factoryBean;
     }

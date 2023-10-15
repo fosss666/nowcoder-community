@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
@@ -46,13 +47,13 @@ public class IndexController {
      * 查询首页
      */
     @GetMapping("/index")
-    public String index(Model model, Page page) {
+    public String index(Model model, Page page, @RequestParam(value = "orderMode", defaultValue = "0") int orderMode) {
         //设置分页, 方法调用前,SpringMVC会自动实例化Model和Page,并将Page注入Model。所以,在thymeleaf中可以直接访问Page对象中的数据.
-        page.setPath("/index");
+        page.setPath("/index?orderMode=" + orderMode);
         page.setRows(discussPostService.findDiscussPostRows(0));
 
         //查询数据
-        List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), 10);
+        List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), 10, orderMode);
         //查询用户
         List<Map<String, Object>> discussPosts = list.stream().map(discussPost -> {
             Map<String, Object> map = new HashMap<>();
@@ -71,6 +72,7 @@ public class IndexController {
             int letterUnreadCount = messageService.findLetterUnreadCount(threadLocalUtil.get().getId(), null);
             model.addAttribute("letterUnreadCount", letterUnreadCount);
         }
+        model.addAttribute("orderMode", orderMode);
 
         return "/index";
     }

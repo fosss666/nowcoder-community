@@ -11,7 +11,7 @@ import java.util.List;
  * Description:
  */
 public interface DiscussPostService {
-    List<DiscussPost> findDiscussPosts(int userId, int offset, int limit);
+    List<DiscussPost> findDiscussPosts(int userId, int offset, int limit, int orderMode);
 
     int findDiscussPostRows(int userId);
 
@@ -42,4 +42,12 @@ public interface DiscussPostService {
      * 更新帖子状态
      */
     void updateStatus(int id, int status);
+
+    /**
+     * 更新帖子分数
+     *
+     * @param postId
+     * @param score
+     */
+    void updateScore(int postId, double score);
 }
