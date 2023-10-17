@@ -17,6 +17,8 @@ public class EventConstant {
     public static final String EVENT_TOPIC_PUBLISH = "publish";
     //删除帖子
     public static final String EVENT_TOPIC_DELETE = "delete";
+    //生成长图
+    public static final String EVENT_TOPIC_SHARE = "share";
 
     public static final int SYSTEM_USER_ID = 1;
 

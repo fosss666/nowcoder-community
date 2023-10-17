@@ -191,3 +191,19 @@ Object obj = redisTemplate.execute(new SessionCallback() {
 ### 热帖排行
 
 添加帖子、加精、添加评论、点赞，这几个操作会触发分数重新计算操作，如果发生以上行为，则将帖子id存入redis中的set，标记需要进行分数刷新操作，然后用quartz定时任务进行刷新
+
+#### 生成 长图
+
+下载安装wkhtmltopdf
+
+在bin目录下执行命令，或将bin配置到环境变量中
+
+* wkhtmltopdf  网页路径  存放路径/name.pdf
+* wkhtmltoimage  网页路径 【--quality 75】  存放路径/name.png    # --quality 75为压缩图片
+
+用java调用：
+
+```java
+Runtime.getRuntime.exec("命令");
+```
+

@@ -6,6 +6,7 @@ import com.fosss.community.constant.ExceptionConstant;
 import com.fosss.community.entity.DiscussPost;
 import com.fosss.community.entity.Event;
 import com.fosss.community.entity.Message;
+import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.service.ElasticsearchService;
 import com.fosss.community.service.MessageService;
@@ -15,9 +16,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.fosss.community.constant.ExceptionConstant.EVENT_SHARE_ERROR;
 
 /**
  * @author: fosss
@@ -35,6 +39,8 @@ public class EventConsumer {
     private DiscussPostService discussPostService;
     @Resource
     private ElasticsearchService elasticsearchService;
+    @Resource
+    private ApplicationProperty property;
 
     /**
      * 消费事件
@@ -108,5 +114,32 @@ public class EventConsumer {
 
         //从es中删除
         elasticsearchService.deleteDiscussPost(event.getEntityId());
+    }
+
+    /**
+     * 生成长图
+     */
+    @KafkaListener(topics = EventConstant.EVENT_TOPIC_SHARE)
+    public void handleShareEvent(ConsumerRecord record) {
+        if (record == null || record.value() == null) {
+            log.error(ExceptionConstant.EVENT_CONTENT_NULL);
+            return;
+        }
+        //解析出事件
+        Event event = JSON.parseObject(record.value().toString(), Event.class);
+        //拼接生成图片的命令
+        String htmlUrl = (String) event.getData().get("htmlUrl");
+        String fileName = (String) event.getData().get("fileName");
+        String suffix = (String) event.getData().get("suffix");
+
+        String cmd = property.getWkImageCommand() + " --quality 75 "
+                + htmlUrl + " " + property.getWkImagePath() + "/" + fileName + suffix;
+        //执行命令
+        try {
+            Runtime.getRuntime().exec(cmd);
+            log.info("生成长图成功: " + cmd);
+        } catch (IOException e) {
+            log.error(EVENT_SHARE_ERROR + ":" + e);
+        }
     }
 }

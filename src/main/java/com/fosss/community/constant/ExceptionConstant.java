@@ -19,4 +19,5 @@ public class ExceptionConstant {
 
     public static final String EVENT_CONTENT_NULL = "事件内容不能为空！";
     public static final String EVENT_FORMAT_ERROR = "事件格式错误！";
+    public static final String EVENT_SHARE_ERROR = "生成长图失败！";
 }

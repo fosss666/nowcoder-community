@@ -29,4 +29,10 @@ public class ApplicationProperty {
     @Value("${community.path.uploadPath}")
     private String uploadPath;
 
+    //长图存储路径
+    @Value("${wk.image.path}")
+    private String wkImagePath;
+    //wk 命令
+    @Value("${wk.image.command}")
+    private String wkImageCommand;
 }

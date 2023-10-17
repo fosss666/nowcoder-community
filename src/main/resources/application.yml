@@ -81,3 +81,9 @@ community:
   path:
     domain: http://localhost  #域名
     uploadPath: E:/PROJECT/community/avaterImgs
+
+
+wk:
+  image: # 长图存储路径
+    path: E:/PROJECT/community/wk-data/images
+    command: cmd /c wkhtmltoimage  # 生成图片的命令
