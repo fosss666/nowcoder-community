@@ -38,7 +38,7 @@ public class ShareController {
 
     @GetMapping("/share")
     public String share(String htmlUrl) {
-        //随机图片名
+        //随机图片名，本地的
         String fileName = CommunityUtil.generateUUID();
         //异步生成长图
         Event event = new Event()
@@ -51,13 +51,14 @@ public class ShareController {
 
         // 返回访问路径
         Map<String, Object> map = new HashMap<>();
-        map.put("shareUrl", property.getDomain() + ":" + property.getPort() + property.getContextPath() + "/share/image/" + fileName);
-
+        //map.put("shareUrl", property.getDomain() + ":" + property.getPort() + property.getContextPath() + "/share/image/" + fileName);
+        //由于上传操作在kafka中执行，所以暂时无法获得访问路径，所以暂时打印在控制台吧
+        map.put("shareUrl", "请看控制台！！！！！");
         return CommunityUtil.getJSONString(ResultEnum.SUCCESS.code, ResultEnum.SUCCESS.msg, map);
     }
 
-    // 获取长图
-    @GetMapping(path = "/share/image/{fileName}")
+    // 获取长图——将图片上传至阿里云，废弃该方法
+    //@GetMapping(path = "/share/image/{fileName}")
     public void getShareImage(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         if (StringUtils.isBlank(fileName)) {
             throw new IllegalArgumentException("文件名不能为空!");

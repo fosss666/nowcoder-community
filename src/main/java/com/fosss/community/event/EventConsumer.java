@@ -10,16 +10,29 @@ import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.service.ElasticsearchService;
 import com.fosss.community.service.MessageService;
+import com.fosss.community.service.OssService;
+import com.fosss.community.utils.CommunityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.entity.ContentType;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.logging.log4j.util.StringMap;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.springframework.http.MediaType;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.annotation.Resource;
-import java.io.IOException;
+import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import static com.fosss.community.constant.ExceptionConstant.EVENT_SHARE_ERROR;
 
@@ -41,6 +54,10 @@ public class EventConsumer {
     private ElasticsearchService elasticsearchService;
     @Resource
     private ApplicationProperty property;
+    @Resource
+    private OssService ossService;
+    @Resource
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     /**
      * 消费事件
@@ -140,6 +157,67 @@ public class EventConsumer {
             log.info("生成长图成功: " + cmd);
         } catch (IOException e) {
             log.error(EVENT_SHARE_ERROR + ":" + e);
+        }
+        // 启用定时器,监视该图片,一旦生成了,则上传至七牛云.
+        UploadTask task = new UploadTask(fileName, suffix);
+        Future future = threadPoolTaskScheduler.scheduleAtFixedRate(task, 500);
+        task.setFuture(future);
+    }
+
+    class UploadTask implements Runnable {
+
+        // 文件名称
+        private String fileName;
+        // 文件后缀
+        private String suffix;
+        // 启动任务的返回值
+        private Future future;
+        // 开始时间
+        private long startTime;
+        // 上传次数
+        private int uploadTimes;
+
+        public UploadTask(String fileName, String suffix) {
+            this.fileName = fileName;
+            this.suffix = suffix;
+            this.startTime = System.currentTimeMillis();
+        }
+
+        public void setFuture(Future future) {
+            this.future = future;
+        }
+
+        @Override
+        public void run() {
+// 生成失败
+            if (System.currentTimeMillis() - startTime > 30000) {
+                log.error("执行时间过长,终止任务:" + fileName);
+                future.cancel(true);
+                return;
+            }
+            // 上传失败
+            if (uploadTimes >= 3) {
+                log.error("上传次数过多,终止任务:" + fileName);
+                future.cancel(true);
+                return;
+            }
+            String path = property.getWkImagePath() + "/" + fileName + suffix;
+            File file = new File(path);
+            if (file.exists()) {
+                log.info(String.format("开始第%d次上传[%s].", ++uploadTimes, fileName));
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    MockMultipartFile multipartFile = new MockMultipartFile(file.getName(), file.getName(),
+                            ContentType.APPLICATION_OCTET_STREAM.toString(), fileInputStream);
+                    String imageUrl = ossService.uploadFile(multipartFile);
+                    System.err.println("@@@@@@长图访问路径：" + imageUrl);
+                    future.cancel(true);//停止定时任务
+                } catch (IOException e) {
+                    log.error("长图上传oss失败");
+                }
+            } else {
+                log.info("等待图片生成[" + fileName + "].");
+            }
         }
     }
 }
