@@ -61,6 +61,8 @@ public class UserController {
     private DiscussPostService discussPostService;
     @Resource
     private CommentService commentService;
+    @Resource
+    private OssService ossService;
 
     /**
      * 跳转账号设置页面
@@ -72,10 +74,11 @@ public class UserController {
     }
 
     /**
-     * 上传头像
+     * 上传头像 ——用oss替代
      */
-    @LoginRequired
-    @PostMapping("/upload")
+    //@Deprecated
+    //@LoginRequired
+    //@PostMapping("/upload")
     public String upload(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
             model.addAttribute("error", ExceptionConstant.FILE_NOT_UPLOAD_ERROR);
@@ -120,9 +123,9 @@ public class UserController {
     }
 
     /**
-     * 获取头像
+     * 获取头像——用oss替代
      */
-    @GetMapping("/header/{fileName}")
+    //@GetMapping("/header/{fileName}")
     public void getHeaderImage(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         //拼接服务器存放地址
         fileName = applicationProperty.getUploadPath() + "/" + fileName;
@@ -255,4 +258,64 @@ public class UserController {
 
         return "/site/my-reply";
     }
+
+    /**
+     * 用oss重写上传和获取头像
+     */
+    @PostMapping("/upload")
+    public String upload2Oss(MultipartFile headerImage, Model model) {
+        if (headerImage == null) {
+            model.addAttribute("error", ExceptionConstant.FILE_NOT_UPLOAD_ERROR);
+            return "/site/setting";
+        }
+
+        String fileName = headerImage.getOriginalFilename();
+        if (StringUtils.isBlank(fileName)) {
+            model.addAttribute("error", ExceptionConstant.FILE_NOT_UPLOAD_ERROR);
+            return "/site/setting";
+        }
+        //获取文件后缀
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
+        if (StringUtils.isBlank(suffix)) {
+            model.addAttribute("error", ExceptionConstant.FILE_FORMAT_ERROR);
+            return "/site/setting";
+        }
+
+        String imgUrl = ossService.uploadFile(headerImage);
+
+        //更新数据库中头像地址
+
+        //获取用户id
+        User user = threadLocalUtil.get();
+        userService.upload(user.getId(), imgUrl);
+
+        return "redirect:/index";
+    }
+
+    /**
+     * 获取头像——用oss替代
+     */
+    @GetMapping("/header/{fileName}")
+    public void getHeaderImageFromOss(@PathVariable("fileName") String fileName, HttpServletResponse response) {
+        //拼接服务器存放地址
+        fileName = applicationProperty.getUploadPath() + "/" + fileName;
+
+        //设置相应类型
+        String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);//+1是去掉图片类型前边的点
+        response.setContentType("image/" + suffix);
+        //读取文件，写入到输出流中
+        try (
+                FileInputStream fis = new FileInputStream(fileName);
+                ServletOutputStream os = response.getOutputStream();
+        ) {
+            byte[] bytes = new byte[1024];
+            int length = 0;
+            while ((length = fis.read(bytes)) != -1) {
+                os.write(bytes, 0, length);
+            }
+        } catch (Exception e) {
+            log.error(ExceptionConstant.FILE_READ_ERROR + ":" + e.getMessage());
+        }
+    }
+
 }

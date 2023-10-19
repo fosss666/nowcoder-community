@@ -35,4 +35,14 @@ public class ApplicationProperty {
     //wk 命令
     @Value("${wk.image.command}")
     private String wkImageCommand;
+
+    //oss
+    @Value("${aliyun.oss.file.endpoint}")
+    private String endpoint;
+    @Value("${aliyun.oss.file.keyid}")
+    private String keyid;
+    @Value("${aliyun.oss.file.keysecret}")
+    private String keysecret;
+    @Value("${aliyun.oss.file.bucketname}")
+    private String bucketname;
 }

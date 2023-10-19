@@ -17,6 +17,13 @@
         <java.version>1.8</java.version>
     </properties>
     <dependencies>
+        <!--oss-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.17.1</version>
+        </dependency>
+
         <!--quartz 异步线程池，定时任务-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
