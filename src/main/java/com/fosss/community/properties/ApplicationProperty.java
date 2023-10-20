@@ -45,4 +45,10 @@ public class ApplicationProperty {
     private String keysecret;
     @Value("${aliyun.oss.file.bucketname}")
     private String bucketname;
+
+    //caffeine
+    @Value("caffeine.posts.max-size")
+    private Integer maxSize;
+    @Value("caffeine.posts.expire-seconds")
+    private Integer expireSeconds;
 }

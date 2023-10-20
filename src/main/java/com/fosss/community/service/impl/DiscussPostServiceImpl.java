@@ -2,17 +2,27 @@ package com.fosss.community.service.impl;
 
 import com.fosss.community.dao.DiscussPostMapper;
 import com.fosss.community.entity.DiscussPost;
+import com.fosss.community.properties.ApplicationProperty;
 import com.fosss.community.service.DiscussPostService;
 import com.fosss.community.utils.SensitiveFilter;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.fosss.community.constant.ExceptionConstant.PARAMETER_NULL;
 
+@Slf4j
 @Service
 public class DiscussPostServiceImpl implements DiscussPostService {
 
@@ -20,12 +30,72 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     private DiscussPostMapper discussPostMapper;
     @Resource
     private SensitiveFilter sensitiveFilter;
+    @Resource
+    private ApplicationProperty property;
+
+    // 帖子列表缓存
+    private LoadingCache<String, List<DiscussPost>> postListCache;
+
+    // 帖子总数缓存
+    private LoadingCache<Integer, Integer> postRowsCache;
+
+    @PostConstruct
+    public void init() {
+        // 初始化帖子列表缓存
+        postListCache = Caffeine.newBuilder()
+                .maximumSize(property.getMaxSize())
+                .expireAfterWrite(property.getExpireSeconds(), TimeUnit.SECONDS)
+                .build(new CacheLoader<String, List<DiscussPost>>() {
+                    @Nullable
+                    @Override
+                    public List<DiscussPost> load(@NonNull String key) throws Exception {
+                        if (key == null || key.length() == 0) {
+                            throw new IllegalArgumentException("参数错误!");
+                        }
+
+                        String[] params = key.split(":");
+                        if (params == null || params.length != 2) {
+                            throw new IllegalArgumentException("参数错误!");
+                        }
+
+                        int offset = Integer.valueOf(params[0]);
+                        int limit = Integer.valueOf(params[1]);
+
+                        // 这里可以做个二级缓存: 先从Redis查 ，没有的话再从mysql查
+
+                        log.debug("load post list from DB.");
+                        return discussPostMapper.selectDiscussPosts(0, offset, limit, 1);
+                    }
+                });
+        // 初始化帖子总数缓存
+        postRowsCache = Caffeine.newBuilder()
+                .maximumSize(property.getMaxSize())
+                .expireAfterWrite(property.getExpireSeconds(), TimeUnit.SECONDS)
+                .build(new CacheLoader<Integer, Integer>() {
+                    @Nullable
+                    @Override
+                    public Integer load(@NonNull Integer key) throws Exception {
+                        log.debug("load post rows from DB.");
+                        return discussPostMapper.selectDiscussPostRows(key);
+                    }
+                });
+    }
 
     public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit, int orderMode) {
+        if (userId == 0 && orderMode == 1) {
+            return postListCache.get(offset + ":" + limit);
+        }
+
+        log.debug("load post list from DB.");
         return discussPostMapper.selectDiscussPosts(userId, offset, limit, orderMode);
     }
 
     public int findDiscussPostRows(int userId) {
+        if (userId == 0) {
+            return postRowsCache.get(userId);
+        }
+
+        log.debug("load post rows from DB.");
         return discussPostMapper.selectDiscussPostRows(userId);
     }
 

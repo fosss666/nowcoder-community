@@ -87,3 +87,9 @@ wk:
   image: # 长图存储路径
     path: E:/PROJECT/community/wk-data/images
     command: cmd /c wkhtmltoimage  # 生成图片的命令
+
+# caffeine自定义配置
+caffeine:
+  posts:
+    max-size: 15
+    expire-seconds: 180
