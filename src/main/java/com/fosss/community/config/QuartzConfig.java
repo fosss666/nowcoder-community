@@ -2,8 +2,10 @@ package com.fosss.community.config;
 
 import com.fosss.community.quartz.AlphaJob;
 import com.fosss.community.quartz.DiscussPostScoreRefreshJob;
+import com.fosss.community.quartz.LocalShareImageDeleteJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
@@ -49,24 +51,23 @@ public class QuartzConfig {
         return factoryBean;
     }
 
-    //配置帖子分数刷新任务
-    // 配置JobDetail
+    // 刷新帖子分数任务
     @Bean
     public JobDetailFactoryBean postScoreRefreshJobDetail() {
         JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
         factoryBean.setJobClass(DiscussPostScoreRefreshJob.class);
         factoryBean.setName("postScoreRefreshJob");
         factoryBean.setGroup("communityJobGroup");
-        factoryBean.setDurability(true);//是否持久化
-        factoryBean.setRequestsRecovery(true);//是否可恢复
+        factoryBean.setDurability(true);
+        factoryBean.setRequestsRecovery(true);
         return factoryBean;
     }
 
-    // 配置Trigger(SimpleTriggerFactoryBean, CronTriggerFactoryBean)
+    // 刷新帖子分数触发器
     @Bean
-    public SimpleTriggerFactoryBean postScoreRefreshTrigger(JobDetail postScoreRefreshDetail) {
+    public SimpleTriggerFactoryBean postScoreRefreshTrigger(JobDetail postScoreRefreshJobDetail) {
         SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
-        factoryBean.setJobDetail(postScoreRefreshDetail);
+        factoryBean.setJobDetail(postScoreRefreshJobDetail);
         factoryBean.setName("postScoreRefreshTrigger");
         factoryBean.setGroup("communityTriggerGroup");
         factoryBean.setRepeatInterval(1000 * 60 * 5);
@@ -74,4 +75,27 @@ public class QuartzConfig {
         return factoryBean;
     }
 
+    // 删除WK图片任务
+    @Bean
+    public JobDetailFactoryBean localShareImageDeleteJobDetail() {
+        JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
+        factoryBean.setJobClass(LocalShareImageDeleteJob.class);
+        factoryBean.setName("wkImageDeleteJob");
+        factoryBean.setGroup("communityJobGroup");
+        factoryBean.setDurability(true);
+        factoryBean.setRequestsRecovery(true);
+        return factoryBean;
+    }
+
+    // 删除WK图片触发器
+    @Bean
+    public SimpleTriggerFactoryBean wkImageDeleteTrigger(JobDetail localShareImageDeleteJobDetail) {
+        SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
+        factoryBean.setJobDetail(localShareImageDeleteJobDetail);
+        factoryBean.setName("wkImageDeleteTrigger");
+        factoryBean.setGroup("communityTriggerGroup");
+        factoryBean.setRepeatInterval(1000 * 60 * 4);
+        factoryBean.setJobDataMap(new JobDataMap());
+        return factoryBean;
+    }
 }
