@@ -47,8 +47,8 @@ public class ApplicationProperty {
     private String bucketname;
 
     //caffeine
-    @Value("caffeine.posts.max-size")
-    private Integer maxSize;
-    @Value("caffeine.posts.expire-seconds")
-    private Integer expireSeconds;
+    @Value("${caffeine.posts.max-size}")
+    private int maxSize;
+    @Value("${caffeine.posts.expire-seconds}")
+    private int expireSeconds;
 }
